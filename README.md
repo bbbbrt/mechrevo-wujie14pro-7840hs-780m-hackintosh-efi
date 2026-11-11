@@ -1,7 +1,7 @@
 # Mechrevo Wujie 14 Pro — Ryzen 7 7840HS + Radeon 780M Hackintosh EFI
 
 [![OpenCore](https://img.shields.io/badge/OpenCore-1.0.8-blue.svg)](https://github.com/acidanthera/OpenCorePkg)
-[![macOS Support](https://img.shields.io/badge/macOS-Sequoia%2015.x%20%7C%20Tahoe%2026.x-success)](https://apple.com/macos)
+[![macOS Tested](https://img.shields.io/badge/Tested-macOS%20Tahoe%2026.6.2-success)](https://www.apple.com/macos/tahoe/)
 [![CPU](https://img.shields.io/badge/CPU-AMD%20Ryzen%207%207840HS-orange)](https://amd.com)
 [![GPU](https://img.shields.io/badge/iGPU-Radeon%20780M%20(Metal%20Accelerated)-red)](https://github.com/luuumi-dev/nullarc)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
@@ -11,8 +11,7 @@
 > **发布包注意事项**
 > - 本仓库面向机械革命无界 14 Pro / Ryzen 7 7840HS / Radeon 780M，属于特定硬件配置，不保证适用于其他机器。
 > - 公开版 config.plist 中的 SMBIOS（机型身份信息）已替换为示例值。首次使用前必须自行生成并填写 Serial、MLB、UUID、ROM。
-> - 本仓库不包含 AMDMicrophone.kext；麦克风安装脚本只接受用户自行准备的驱动文件。
-> - AppleHDA.kext 未随仓库分发；NullArc 完整用户态驱动也需从上游单独获取。
+> - AppleHDA.kext 未随仓库分发；[NullArc](https://github.com/luuumi-dev/nullarc) 完整用户态驱动也需从上游单独获取。
 > - 首次测试请使用 U 盘 EFI，提前备份能够启动的版本。
 
 
@@ -21,7 +20,7 @@
 <a name="english"></a>
 # English
 
-Hardware-specific OpenCore EFI configuration, troubleshooting notes, and macOS helper scripts for the **Mechrevo Wujie 14 Pro (机械革命 无界14 Pro)** featuring the **AMD Ryzen 7 7840HS (Zen 4 Phoenix)** processor and **AMD Radeon 780M (RDNA 3)** integrated graphics running **macOS Sequoia 15.x** and **macOS Tahoe 26.x**.
+Hardware-specific OpenCore EFI configuration, troubleshooting notes, and macOS helper scripts for the **Mechrevo Wujie 14 Pro (机械革命 无界14 Pro)** featuring the **AMD Ryzen 7 7840HS (Zen 4 Phoenix)** processor and **AMD Radeon 780M (RDNA 3)** integrated graphics. **Tested on macOS Tahoe 26.6.2.**
 
 ---
 
@@ -31,13 +30,14 @@ Hardware-specific OpenCore EFI configuration, troubleshooting notes, and macOS h
 | :--- | :--- | :---: |
 | **Model** | Mechrevo Wujie 14 Pro (MECHREVO WUJIE14 Series-PHX) | :white_check_mark: Supported |
 | **Processor** | AMD Ryzen 7 7840HS (8 Cores / 16 Threads, Zen 4, up to 5.1GHz) | :white_check_mark: Native Power Management |
-| **Graphics** | AMD Radeon 780M (12 CUs, RDNA 3, PCI `1002:15BF`) | :white_check_mark: Metal Acceleration (NullArc) |
+| **Graphics** | AMD Radeon 780M (12 CUs, RDNA 3, PCI `1002:15BF`) | :white_check_mark: Metal Acceleration ([NullArc](https://github.com/luuumi-dev/nullarc)) |
 | **Display** | 14.0" 2.8K (2880 × 1800), 16:10, 120Hz Refresh Rate, 100% sRGB | :white_check_mark: Native 120Hz & HiDPI |
 | **Memory** | 16GB / 32GB Dual-Channel DDR5 5600MHz | :white_check_mark: Working |
 | **Storage** | Dual M.2 PCIe 4.0 NVMe SSD slots | :white_check_mark: Native APFS |
 | **Wi-Fi** | Intel Wi-Fi 6 AX200 (802.11ax) | :white_check_mark: AirportItlwm Native UI |
 | **Bluetooth** | Intel AX200 Bluetooth 5.2 (`8087:0029`) | :white_check_mark: BlueToolFixup + Firmware |
 | **Audio** | Senary (Conexant) CX8070 Codec (`14F1:1F87`) | :white_check_mark: Speaker & Headphone Out |
+| **Microphone** | Internal AMD ACP digital microphone | [AMDMicrophone](https://github.com/qhuyduong/AMDMicrophone) · [Deployment script](scripts/一键部署麦克风.command) |
 | **Touchpad** | I2C HID Precision Multi-touch Touchpad | :white_check_mark: VoodooI2C Gestures |
 | **Keyboard** | PS/2 Keyboard with Custom Fn Hotkeys (Volume, Brightness) | :white_check_mark: VoodooPS2 Remapped |
 | **Battery** | Integrated Li-Polymer Battery (`F166003A`) | :white_check_mark: SMCBatteryManager |
@@ -47,7 +47,7 @@ Hardware-specific OpenCore EFI configuration, troubleshooting notes, and macOS h
 
 ## 2. Working Status & Features
 
-- [x] **Radeon 780M Metal 3 Hardware Acceleration**: Enabled via NullArc userland Mesa RADV driver stack and `PhxBringup.kext`. Buttery-smooth desktop rendering, Launchpad, and animations.
+- [x] **Radeon 780M Metal 3 Hardware Acceleration**: Enabled via [NullArc](https://github.com/luuumi-dev/nullarc) userland Mesa RADV driver stack and `PhxBringup.kext`. Buttery-smooth desktop rendering, Launchpad, and animations.
 - [x] **120Hz Ultra-smooth Display**: Full support for native 2880x1800 @ 120Hz refresh rate.
 - [x] **Zero USB Mouse/Keyboard Latency**: Integrated `XhciNudge.kext` and `xhcinudge=1` boot-arg eliminate the notorious AMD Zen 4 XHCI input stutter bug.
 - [x] **Native Wi-Fi Control**: AirportItlwm provides native macOS menu bar Wi-Fi selection and high-speed wireless networking.
@@ -56,8 +56,7 @@ Hardware-specific OpenCore EFI configuration, troubleshooting notes, and macOS h
 - [x] **Custom Keyboard Fn Shortcuts**: Volume mute/down/up (F8-F10), Brightness down/up (F11-F12), and swapped Win/Cmd keys.
 - [x] **Battery Status & Power Management**: Accurate percentage readouts, charging cycle count, and dynamic CPU frequency scaling.
 - [x] **Sleep & Wake**: Fast sleep and instant wake upon opening lid or pressing keys.
-- [!] **Internal Digital Microphone**: The driver is not included in this repository. The optional helper only installs a separately obtained AMDMicrophone.kext after macOS has booted; do not load it from OpenCore.
-- [!] **Blind Login / Auto-login**: Due to NullArc GPU pipeline architecture, the macOS `loginwindow` renders as a black screen until credentials are typed (or auto-login is enabled).
+- [!] **Blind Login / Auto-login**: Due to [NullArc](https://github.com/luuumi-dev/nullarc) GPU pipeline architecture, the macOS `loginwindow` renders as a black screen until credentials are typed (or auto-login is enabled).
 
 ---
 
@@ -68,9 +67,9 @@ To streamline post-installation and hardware optimization, several one-click mac
 | Script Name | Purpose & Functionality | Usage |
 | :--- | :--- | :--- |
 | **`一键解决分辨率_开启HiDPI.command`** | **Screen Resolution & HiDPI Optimizer**<br>• Removes quarantine flags from BetterDisplay.<br>• Cleans corrupt WindowServer display cache.<br>• Enables 1920x1200 retina scaling via one-key-hidpi. | Double-click to run in Terminal |
-| **内置数字麦克风** | 仅提供用户自备驱动的安装辅助脚本；仓库不包含 AMDMicrophone.kext 本体，也不在 OpenCore 启动阶段加载。 |
-| **`一键安装NullArc显卡驱动.command`** | **NullArc Radeon 780M Metal 3 Installer**<br>• Verifies Auto-Login status.<br>• Automatically unzips and runs `./install.sh --windowserver`.<br>• Directs user through the 2-stage reboot process. | Double-click to run with `sudo` |
-| **`NullArc显卡看门狗修复与复活.command`** | **GPU Watchdog Reset & Recovery Tool**<br>• Clears `WindowServer` crash counter and `phxboot.pending` NVRAM lock.<br>• Removes `phxboot-off` safe-mode fallback and revives 780M Metal 3 mode. | Double-click if GPU crashes/loops |
+| [AMDMicrophone](https://github.com/qhuyduong/AMDMicrophone) | [Deployment helper](scripts/一键部署麦克风.command) | [Upstream source](https://github.com/qhuyduong/AMDMicrophone) |
+| [NullArc graphics installer](scripts/一键安装NullArc显卡驱动.command) | Radeon 780M Metal 3 installer; follows the upstream two-stage reboot process. | [NullArc upstream](https://github.com/luuumi-dev/nullarc) |
+| [NullArc watchdog recovery script](scripts/NullArc显卡看门狗修复与复活.command) | Clears the GPU watchdog fallback state and helps recover 780M acceleration. | [NullArc upstream](https://github.com/luuumi-dev/nullarc) |
 
 ---
 
@@ -91,7 +90,7 @@ Before booting OpenCore, configure the following settings in your BIOS (press **
 ## 5. Quick Installation Guide
 
 ### Step 1: Prepare the USB Installer
-1. Create a bootable macOS Sequoia (15.x) or Tahoe (26.x) installer USB flash drive.
+1. Create a bootable macOS Tahoe 26.6.2 installer USB flash drive.
 2. Mount the USB drive's EFI partition (`ESP`).
 3. Download the latest release from the [`release/`](release/) directory (or clone this repository).
 4. Copy the entire `EFI` folder (`BOOT` and `OC`) into the root of the USB drive's EFI partition.
@@ -110,14 +109,13 @@ To prevent Apple ID / iCloud / iMessage collisions, generate your own serial num
 1. Insert the USB drive and press **F12** (or F7) at power-on to select the USB boot device.
 2. In the OpenCore picker, press **Spacebar** to reveal auxiliary tools.
 3. Highlight **`Reset NVRAM`** and press **Enter**. The system will restart automatically.
-4. On the next OpenCore picker, choose **Install macOS Sequoia / Tahoe**.
+4. On the next OpenCore picker, choose **Install macOS Tahoe 26.6.2**.
 
 ### Step 4: Post-Installation, GPU Acceleration & HiDPI
 1. Once installation completes and you reach the macOS desktop, enable **Automatic Login**:
    - Go to **System Settings** -> **Users & Groups** -> **Automatically log in as** -> select your user account.
-2. Run `scripts/一键安装NullArc显卡驱动.command` to activate full Metal acceleration.
+2. Run [NullArc graphics installer](scripts/一键安装NullArc显卡驱动.command) to activate full Metal acceleration.
 3. Run `scripts/一键解决分辨率_开启HiDPI.command` to set crisp 1920x1200 HiDPI resolution.
-4. (Optional) After macOS boots, review the [AMDMicrophone upstream prerequisites](https://github.com/qhuyduong/AMDMicrophone) and run `scripts/一键部署麦克风.command`. Do not add this Kext to OpenCore `Kernel -> Add`.
 
 ---
 
@@ -131,7 +129,7 @@ This table summarizes the root causes and permanent fixes discovered during hard
 | **#2** | **AMD Zen 4 XHCI Controller** | **Severe Input Lag**: Mouse and keyboard take 2-3 seconds per packet; feels like a frozen system. | Native `AppleUSBXHCIPCI` lacks polling wakeup for Zen 4 XHCI, leading to queued burst reporting. | **Inject `XhciNudge.kext` and add `xhcinudge=1` to boot-args!** |
 | **#3** | **`ProvideMaxSlide=100`** | **Prohibit Sign 🚫 in Phase 2**: `Err(0xE) <- EB.MM.AKMR` during secondary installer boot. | Enforcing MaxSlide 100 restricts memory search to 0-200MB. The 748MB installer DMG collided and aborted. | **Must set `ProvideMaxSlide=0`!** Unlocks all 256 slide slots. |
 | **#4** | **`SecureBootModel=Default`** | **Prohibit Sign 🚫 in APFS Update**: `OPEN! Err(0xE) root_hash`. | Patched AMD kernel fails Apple Secure Boot T2 manifest root hash verification. | **Set `Misc -> Security -> SecureBootModel = Disabled`.** |
-| **#5** | **NullArc Blank Login Window** | **Black screen with working cursor** on boot. | NullArc GPU rendering path cannot composite the native `loginwindow` UI. | **Type user password blindly and press Enter, or enable macOS Auto-Login.** |
+| **#5** | **[NullArc](https://github.com/luuumi-dev/nullarc) Blank Login Window** | **Black screen with working cursor** on boot. | [NullArc](https://github.com/luuumi-dev/nullarc) GPU rendering path cannot composite the native `loginwindow` UI. | **Type user password blindly and press Enter, or enable macOS Auto-Login.** |
 | **#6** | **`Display-Override.kext`** | **System freeze halfway through Apple logo progress bar.** | Attaching `AppleBacklightDisplay` to AMD 780M Framebuffer dereferences null registers. | **Delete this kext completely!** Use BetterDisplay for HiDPI and scaling. |
 | **#7** | **`MechrevoFan.kext`** | **Instant hardware power-off / reboot** upon kext injection. | Raw I/O port `0x66/0x68` concurrency conflicts with ACPI EC controller on Zen 4. | **Keep `MechrevoFan.kext` disabled** unless dedicated ACPI mutex patches are applied. |
 | **#8** | **`phxboot.pending` NVRAM Lock** | **Endless reboot loop**: Rebooting every 90 seconds after `mesboot`. | Watchdog script writes state to NVRAM. Booting again without cleaning repeats watchdog. | **Press Spacebar in OpenCore and execute `Reset NVRAM`!** |
@@ -143,10 +141,10 @@ This table summarizes the root causes and permanent fixes discovered during hard
 - Configured for the Mechrevo Wujie 14 Pro based on this machine’s hands-on testing. Compatibility may vary by BIOS and macOS build.
 - Special thanks to:
   - **[Acidanthera](https://github.com/acidanthera)** (OpenCorePkg, Lilu, VirtualSMC, AppleALC, VoodooPS2)
-  - **[NullArc / luuumi-dev](https://github.com/luuumi-dev/nullarc)** (NullArc AMD Radeon 780M Metal graphics driver)
+  - **[NullArc / luuumi-dev](https://github.com/luuumi-dev/nullarc)** (AMD Radeon 780M Metal graphics driver)
   - **[VoodooI2C Team](https://github.com/VoodooI2C/VoodooI2C)** (Touchpad multitouch support)
   - **[OpenIntelWireless](https://github.com/OpenIntelWireless)** (AirportItlwm & IntelBluetoothFirmware)
-  - **[qhuyduong / AMDMicrophone](https://github.com/qhuyduong/AMDMicrophone)** (ACP 数字麦克风上游项目，仅鸣谢；仓库不分发 Kext 本体)
+- **[AMDMicrophone](https://github.com/qhuyduong/AMDMicrophone)** (AMD ACP 内置数字麦克风项目)
 
 ---
 ---
@@ -156,7 +154,7 @@ This table summarizes the root causes and permanent fixes discovered during hard
 
 机械革命 **无界 14 Pro (MECHREVO WUJIE14 PRO)** 搭载 **AMD 锐龙 7 7840HS (Zen 4 Phoenix)** 处理器与 **AMD Radeon 780M (RDNA 3)** 核显的实机深度调优 OpenCore 黑苹果引导与全套辅助脚本项目。
 
-本项目在 **macOS Sequoia 15.x** 与 **macOS Tahoe 26.x** 上做过分阶段测试；不同版本的可用功能可能不同，并非全部功能均已完整验证。
+本项目已在 **macOS Tahoe 26.6.2** 上完成实机测试；其他 macOS 版本尚未验证。
 
 ---
 
@@ -166,13 +164,14 @@ This table summarizes the root causes and permanent fixes discovered during hard
 | :--- | :--- | :---: |
 | **整机型号** | 机械革命 无界14 Pro (WUJIE14 Series-PHX) | :white_check_mark: 本机型专用配置 |
 | **处理器** | AMD Ryzen 7 7840HS (8 核 16 线程, Zen 4 架构, 最高 5.1GHz) | :white_check_mark: 睿频调频与原生电源管理正常 |
-| **集成核显** | AMD Radeon 780M (12 CUs, RDNA 3 架构, PCI `1002:15BF`) | :white_check_mark: NullArc Metal 硬件加速生效 |
+| **集成核显** | AMD Radeon 780M (12 CUs, RDNA 3 架构, PCI `1002:15BF`) | :white_check_mark: [NullArc](https://github.com/luuumi-dev/nullarc) Metal 硬件加速生效 |
 | **内建屏幕** | 14.0 英寸 2.8K 分辨率 (2880 × 1800), 16:10 比例, 120Hz 刷新率 | :white_check_mark: 原生 120Hz 高刷与 HiDPI 正常 |
 | **内存容量** | 16GB / 32GB 双通道 DDR5 5600MHz | :white_check_mark: 正常识别使用 |
 | **固态硬盘** | 双 M.2 PCIe 4.0 NVMe 插槽 | :white_check_mark: 原生 APFS 读写高速正常 |
 | **无线网卡** | Intel Wi-Fi 6 AX200 无线网卡 (802.11ax) | :white_check_mark: AirportItlwm 原生 Wi-Fi 选网 |
 | **蓝牙模块** | Intel AX200 蓝牙 5.2 (`8087:0029`) | :white_check_mark: 蓝牙耳机与键鼠稳定配对 |
 | **声卡芯片** | 新格 CX8070 声卡芯片 (`14F1:1F87`) | :white_check_mark: 扬声器外放与耳机输出正常 |
+| **内置麦克风** | [AMDMicrophone](https://github.com/qhuyduong/AMDMicrophone) | [部署脚本](scripts/一键部署麦克风.command) · [上游项目](https://github.com/qhuyduong/AMDMicrophone) |
 | **触控面板** | I2C HID 协议精密多点触控板 | :white_check_mark: VoodooI2C 原生多指手势丝滑跟手 |
 | **笔记本键盘** | PS/2 键盘，深度重映射多媒体功能键 | :white_check_mark: F8-F10 调音量、F11-F12 调亮度 |
 | **电池管理** | 原装锂聚合物电池 (`F166003A`) | :white_check_mark: SMCBatteryManager 准确显示百分比 |
@@ -183,7 +182,7 @@ This table summarizes the root causes and permanent fixes discovered during hard
 ## 二、功能特性与细节
 
 1. **Radeon 780M 核显开启 Metal 3 硬件加速**：
-   - 依赖 NullArc 用户态 Mesa RADV 渲染栈与 `PhxBringup.kext` 内核桥接。
+   - 依赖 [NullArc](https://github.com/luuumi-dev/nullarc) 用户态 Mesa RADV 渲染栈与 `PhxBringup.kext` 内核桥接。
    - 访达窗口动画、程序坞磨砂、Launchpad 翻页及 120Hz 丝滑流畅。
 2. **彻底解决 Zen 4 架构 USB 输入中断延迟**：
    - 注入专为 AMD 现代平台编译的 `XhciNudge.kext` 并配合启动参数 `xhcinudge=1`，周期性唤醒状态寄存器，彻底消除“鼠标几秒动一下”的严重卡顿！
@@ -203,9 +202,9 @@ This table summarizes the root causes and permanent fixes discovered during hard
 | 脚本文件名 | 功能说明与适用场景 | 使用方式 |
 | :--- | :--- | :--- |
 | **`一键解决分辨率_开启HiDPI.command`** | **屏幕分辨率与 HiDPI 黄金缩放工具**<br>• 一键解除 BetterDisplay 秒退与隔离属性。<br>• 彻底清理 WindowServer 显示器脏缓存（解决改分辨率黑屏）。<br>• 内置 Gitee 极速 one-key-hidpi，开启 1920×1200 视网膜缩放。 | 双击直接在终端中运行 |
-| **内置数字麦克风** | 仅提供用户自备驱动的安装辅助脚本；仓库不包含 AMDMicrophone.kext 本体，也不在 OpenCore 启动阶段加载。 |
-| **`一键安装NullArc显卡驱动.command`** | **NullArc 780M Metal 3 驱动自动安装**<br>• 自动检查并提示开启【自动登录】防黑屏。<br>• 自动解压并静默执行 `./install.sh --windowserver`，省去敲命令步骤。 | 双击输入密码运行 |
-| **`NullArc显卡看门狗修复与复活.command`** | **显卡看门狗死锁排查与一键复活**<br>• 清除 WindowServer 崩溃计数器与 `phxboot.pending` NVRAM 锁。<br>• 抹除 `phxboot-off` 停用标记，一键重启复活 780M 硬件加速。 | 双击一键执行并重启 |
+| [AMDMicrophone](https://github.com/qhuyduong/AMDMicrophone) | [一键部署麦克风脚本](scripts/一键部署麦克风.command) | [上游项目](https://github.com/qhuyduong/AMDMicrophone) |
+| [NullArc 显卡驱动安装脚本](scripts/一键安装NullArc显卡驱动.command) | 780M Metal 3 驱动安装；按上游流程完成两阶段重启。 | [NullArc 上游项目](https://github.com/luuumi-dev/nullarc) |
+| [NullArc 显卡看门狗恢复脚本](scripts/NullArc显卡看门狗修复与复活.command) | 清理显卡看门狗回退状态，辅助恢复 780M 硬件加速。 | [NullArc 上游项目](https://github.com/luuumi-dev/nullarc) |
 
 ---
 
@@ -226,7 +225,7 @@ This table summarizes the root causes and permanent fixes discovered during hard
 ## 五、极速装机与部署指南
 
 ### 第一步：准备 U 盘并拷贝 EFI
-1. 制作好 macOS Sequoia (15.x) 或 Tahoe (26.x) 的原版安装 U 盘。
+1. 制作 macOS Tahoe 26.6.2 安装 U 盘。
 2. 挂载 U 盘的 EFI 分区（ESP）。
 3. 下载本项目 [`release/`](release/) 目录中的 `Mechrevo-Wujie14Pro-7840HS-780M-EFI.zip`。
 4. 将解压出来的 `BOOT` 与 `OC` 两个文件夹完整拷贝到 U 盘的 `EFI/` 目录下。
@@ -245,9 +244,8 @@ This table summarizes the root causes and permanent fixes discovered during hard
 
 ### 第四步：进入系统后开启核显加速与 HiDPI 缩放
 1. 进桌面后，先在【系统设置】->【用户与群组】中开启**【自动以此身份登录】**。
-2. 运行 `scripts/一键安装NullArc显卡驱动.command` 部署 Mesa RADV 用户态加速环境，按提示重启两次。
+2. 运行 [NullArc 显卡安装脚本](scripts/一键安装NullArc显卡驱动.command) 部署 Mesa RADV 用户态加速环境，按提示重启两次。
 3. 运行 `scripts/一键解决分辨率_开启HiDPI.command` 设定 1920×1200 黄金视网膜缩放。
-4. （可选）进入 macOS 桌面后，先阅读 [AMDMicrophone 上游前置条件](https://github.com/qhuyduong/AMDMicrophone)，再运行 `scripts/一键部署麦克风.command`。不要将该 Kext 加回 OpenCore 的 `Kernel -> Add`。
 
 ---
 
@@ -261,7 +259,7 @@ This table summarizes the root causes and permanent fixes discovered during hard
 | **💀 死亡案例 2** | **AMD Zen 4 XHCI 芯片**<br>(USB 中断延迟 Bug) | **几秒动一次超卡假死**：安装界面鼠标肉眼可见几秒才刷新一次，误以为是显卡没工作。 | 原生 `AppleUSBXHCIPCI` 缺少针对 AMD 控制器的状态轮询唤醒，USB 键盘鼠标数据包在队列中堆积 2~3 秒才批量上报。 | **注入 `XhciNudge.kext` 并添加 `xhcinudge=1` 启动参数！** 主动周期唤醒状态轮询。 |
 | **💀 死亡案例 3** | **`ProvideMaxSlide=100`**<br>(内存检索上限约束) | **第二阶段安装报禁止标志 🚫**：报 `Err(0xE) <- EB.MM.AKMR`。 | 强制 OpenCore 仅在 0~200MB 物理内存内检索。第二阶段安装需 748MB 连续内存盘，硬塞碰撞导致内存分配失败中止。 | **必须设为 `ProvideMaxSlide=0`！** 开放全部 256 个 Slide 区间供检索。 |
 | **💀 死亡案例 4** | **`SecureBootModel=Default`**<br>(Apple 安全引导) | **第二阶段更新报禁止标志 🚫**：报 `Err(0xE) usr\standalone\OS.dmg.root_hash`。 | AMD Vanilla 补丁修补了内核，触发 T2 芯片根哈希校验拦截。 | **必须将 `SecureBootModel` 改为 `Disabled`！** 彻底绕过原厂根哈希拦截。 |
-| **💀 死亡案例 5** | **NullArc 显卡盲打登录机理**<br>(登录界面全黑) | **开机进入登录界面全黑，仅有鼠标光标能活动**。 | NullArc 官方明确说明，GPU 渲染管道无法合成渲染 macOS 原生的 `loginwindow` 窗口服务。 | **此时键盘盲打登录密码并按回车即可进入桌面，或在系统中开启“自动登录”！** |
+| **💀 死亡案例 5** | **[NullArc](https://github.com/luuumi-dev/nullarc) 显卡盲打登录机理**<br>(登录界面全黑) | **开机进入登录界面全黑，仅有鼠标光标能活动**。 | [NullArc](https://github.com/luuumi-dev/nullarc) 官方明确说明，GPU 渲染管道无法合成渲染 macOS 原生的 `loginwindow` 窗口服务。 | **此时键盘盲打登录密码并按回车即可进入桌面，或在系统中开启“自动登录”！** |
 | **💀 死亡案例 6** | **`Display-Override.kext`**<br>(屏幕伪装驱动) | **白苹果进度条过半死锁**：苹果进度条走到 1/3~1/2（显卡切换瞬间）画面永久冻结。 | 驱动强行挂载 `AppleBacklightDisplay` 到 AMD 780M Framebuffer，由于缺少硬件原生背光寄存器触发空指针崩溃。 | **【铁律】彻底移除该 kext！** 分辨率与缩放交由 BetterDisplay 管理。 |
 | **💀 死亡案例 7** | **`MechrevoFan.kext`**<br>(机械革命风扇驱动) | **硬件看门狗瞬间重启**：驱动注入瞬间主板硬件级强行掉电重启。 | 驱动直接通过 I/O 端口 `0x66/0x68` 并发无锁读写嵌入式控制器（EC），在 Zen 4 下与 ACPI 产生严重硬件资源争用导致 EC 挂起。 | **禁止盲目开启！** 保持该条目为 `False`。 |
 | **💀 死亡案例 8** | **NVRAM 遗留状态**<br>(`phxboot.pending` 挂起锁) | **连环重启“躺枪”**：明明改回了正确 EFI，开机依然自动重启。 | macOS 显卡守护进程异常退出时向主板 NVRAM 写入未完成标志，下次开机重复触发看门狗重启。 | **修改排错后必须按空格执行一次 `Reset NVRAM`！** 彻底清空主板异常状态位。 |
@@ -273,7 +271,7 @@ This table summarizes the root causes and permanent fixes discovered during hard
 - 本项目原创文档、辅助脚本与配置整理部分采用 MIT 开源许可证。第三方驱动与二进制组件遵循各自上游许可，详见 THIRD_PARTY_NOTICES.md。
 - 诚挚感谢以下开源团队与先行者：
   - **[Acidanthera 团队](https://github.com/acidanthera)** (OpenCorePkg, Lilu, VirtualSMC, AppleALC, VoodooPS2)
-  - **[NullArc / luuumi-dev](https://github.com/luuumi-dev/nullarc)** (NullArc AMD Radeon 780M Metal 显卡驱动体系)
+  - **[NullArc / luuumi-dev](https://github.com/luuumi-dev/nullarc)**（AMD Radeon 780M Metal 显卡驱动体系）
   - **[VoodooI2C 团队](https://github.com/VoodooI2C/VoodooI2C)** (触控板多点触控支持)
   - **[OpenIntelWireless 团队](https://github.com/OpenIntelWireless)** (AirportItlwm 与 IntelBluetoothFirmware)
   - **AMD OS X 社区** (AMD Vanilla 内核补丁生态)

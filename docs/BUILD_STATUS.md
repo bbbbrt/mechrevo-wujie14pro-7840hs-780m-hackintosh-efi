@@ -3,10 +3,10 @@
 > 公开说明：本文是开发过程的历史排错日志，不代表当前所有功能都已在所有系统版本完整验证。部分早期根因分析属于当时的诊断假设，应以实机日志和上游文档重新确认。个人密码及本机目录路径已清理。
 
 ## 目标环境
-- 目标系统：macOS Sequoia 15.8.2, build 24H232 (Darwin 24.6.0)
+- 目标系统：macOS Tahoe 26.6.2（当前实测版本）
 - 硬件架构：AMD Ryzen 7 7840HS (8 核 16 线程, Zen 4 Phoenix) / Radeon 780M (RDNA 3)
 - 引导工具：OpenCore 1.0.8 DEBUG
-- 镜像状态：**已成功进入 macOS Sequoia 恢复界面（Recovery UI）**！
+- 镜像状态：**已成功进入 macOS 恢复界面（Recovery UI）**！
 
 ---
 
@@ -25,7 +25,7 @@
 - **修复**：恢复 `DevirtualiseMmio=False` 与 `SetupVirtualMap=False`，主板 0xFF000000 闪存区映射恢复正常。
 
 ### 轮次 4：成功进入 Recovery UI；排查「几秒动一次」严重输入延迟根因与修复 (Turn 4)
-- **现状进展**：机器已顺利通过所有早期内核引导阶段，成功进入 macOS Sequoia Recovery 图形安装界面！
+- **现状进展**：机器已顺利通过所有早期内核引导阶段，完成 macOS 恢复环境的早期引导排错。
 - **「鼠标几秒动一次、超卡超卡」的真相定位**：
   - 用户反馈外接鼠标“要几秒才动一次，像是显卡没干活”。
   - **深度技术真相**：这**不是**核显未加速导致的慢（纯 CPU 软解通常只是帧率较低但响应在毫秒级），而是 **AMD Zen 4 移动端 XHCI 芯片的严重 USB 输入中断延迟（USB Input Latency Bug）**！
@@ -37,7 +37,7 @@
   - 在 `boot-args` 中添加 `-vi2c-force-polling` 参数（AMD I2C 轮询支持）。
 - **核显（Radeon 780M）能否在恢复模式开启的解答**：
   - **结论：无法在恢复界面开启，必须装好系统后再开启。**
-  - **技术原因**：NullArc 显卡加速并非单纯的 kext 驱动，它依赖用户态的 Linux Mesa RADV 驱动堆栈（`/Users/Shared/gpu` 下的固件、`local.phxboot.plist` 守护进程以及 `/Library/Extensions` 的辅助内核包）。Recovery 界面是一个只读的精简内存镜像（BaseSystem.dmg），根本没有这套用户态运行环境。
+  - **技术原因**：[NullArc](https://github.com/luuumi-dev/nullarc) 显卡加速并非单纯的 kext 驱动，它依赖用户态的 Linux Mesa RADV 驱动堆栈（`/Users/Shared/gpu` 下的固件、`local.phxboot.plist` 守护进程以及 `/Library/Extensions` 的辅助内核包）。Recovery 界面是一个只读的精简内存镜像（BaseSystem.dmg），根本没有这套用户态运行环境。
   - 但一旦解决了上面的 USB 中断延迟与启用了原生 I2C 触控板，恢复模式操作将恢复正常可用，完全足以流畅完成磁盘格式化与系统安装！
 - **网络方案确认**：
   - 极力推荐直接使用 **USB 3.0 转 RJ45 有线网卡**（免驱即插即用、满速下载且绝不丢包）。
@@ -53,16 +53,16 @@
   - **连通性测试**：执行 `ping -c 3 223.5.5.5`，若能正常接收回复包则外网通畅。
   - **Type-C 接口切换**：无界 14 Pro 左侧有两个 Type-C 接口（一个全功能 USB 3.2 Gen 2，一个 USB4），不同芯片协议支持略有差异，若未识别可热插拔至相邻的另一个 Type-C 端口。
 - **Intel AX200 原生 Wi-Fi 全面激活**：
-  - 获取并替换为专门针对 **macOS Sequoia 15.x (Darwin 24.6.0)** 编译的最新发布版 [`AirportItlwm.kext`]([本机路径已省略])（v2.4.0-alpha-7204c69，二进制 15.9 MB）。
+  - 获取并替换为专门针对 **当时尝试使用的 macOS 安装介质版本** 编译的最新发布版 [`AirportItlwm.kext`]([本机路径已省略])（v2.4.0-alpha-7204c69，二进制 15.9 MB）。
   - `config.plist` 将 `AirportItlwm.kext` 设置为 `Enabled = true`，匹配内核区间 `MinKernel: 24.0.0` 至 `MaxKernel: 24.99.99`。
   - 重新引导后进入恢复模式，屏幕**右上角**将直接显示原生 Wi-Fi 图标，可直接连接无线局域网。
 - **当前验证与部署状态**：
   - 本地 EFI 与 U 盘 `[本机路径已省略] 均已更新完毕并通过 `ocvalidate`（0 错误）。
-  - 恢复模式下磁盘准备：打开【磁盘工具】 ➔ “显示所有设备” ➔ 抹掉安装盘为 `APFS` / `GUID 分区图` ➔ 启动【重新安装 macOS Sequoia】在线下载安装。
+  - 恢复模式下磁盘准备：打开【磁盘工具】 ➔ “显示所有设备” ➔ 抹掉安装盘为 `APFS` / `GUID 分区图` ➔ 启动【重新安装 macOS】在线下载安装。
 
 ### 轮次 6：第二阶段安装引导排查；定位「禁止标志 ⊘ (support.apple.com/mac/startup)」根因与修复 (Turn 6)
 - **现象复现与用户反馈**：
-  - 用户在恢复模式下成功将 Sequoia 第一阶段文件写入本地磁盘 `mac`，机器自动重启进入 OpenCore 选单。
+  - 用户在恢复模式下成功将 macOS 安装第一阶段文件写入本地磁盘 `mac`，机器自动重启进入 OpenCore 选单。
   - 选单新增第二阶段条目 `3. macOS Installer`。
   - 用户选中 `macOS Installer` 后，屏幕未打印 Verbose 文本，而是直接显示苹果「禁止标志 ⊘」及网址 `support.apple.com/mac/startup`。
 - **深度日志根因分析 (抓取自实机 `[本机路径已省略]
@@ -116,7 +116,7 @@
      - `boot.efi` 因无法为内核与内存盘分配内存（`AllocateKernelMemoryRange`）直接中止，触发禁止符 🚫。
 - **修复措施与技术验证**：
   1. **解除 Slide 检索上限**：将 `Booter -> Quirks -> ProvideMaxSlide` 从 `100` 改为 **`0`**（默认安全模式，完全开放 0~255 全量 256 个 Slide 区间供检索）。根据实机内存映射计算，主内存描述符 #7（`0x09F3C000` ~ `0x42358000`，共 943.8MB 连续可用内存）可提供从 Slide 80 到 191 共 112 个合法可用区间，彻底避免回退碰撞。
-  2. **全盘同步更新**：同步写入本地两份 EFI（`EFI/OC/`、`EFI-SEQUOIA-15.8.2-MINIMAL/`）、U 盘当前引导 `[本机路径已省略] U 盘核心备份包 `[本机路径已省略]
+  2. **全盘同步更新**：同步写入本地两份 EFI（`EFI/OC/`、`EFI-MINIMAL/`）、U 盘当前引导 `[本机路径已省略] U 盘核心备份包 `[本机路径已省略]
   3. **工具验证**：经 `ocvalidate.exe` 校验，全部 0 错误通过。
 - **用户操作要点**：
   - 启动进入 OpenCore 菜单时，**必须先按空格键（或方向键）选中 `5. Reset NVRAM` 回车一次**，彻底清除此前驻留在 NVRAM `boot-args` 中的残留参数 `slide=80`。
@@ -124,19 +124,19 @@
 
 ---
 
-### 轮次 8：macOS Tahoe 26.7.2 镜像恢复与进系统黑屏仅有鼠标排查（NullArc / Radeon 780M 驱动与盲打登录机理） (Turn 8)
+### 轮次 8：macOS Tahoe 26.6.2 镜像恢复与进系统黑屏仅有鼠标排查（[NullArc](https://github.com/luuumi-dev/nullarc) / Radeon 780M 驱动与盲打登录机理） (Turn 8)
 - **现状与用户反馈**：
   - 用户通过 R-Drive Image（镜像密码已省略。
-  - 用户通过 U 盘 OpenCore 引导进入恢复后的 macOS Tahoe 26.7.2，内核顺利引导，鼠标指针活动自如，但屏幕全黑无图形界面（“只有鼠标可以活动，什么都看不到，黑色的，应该是把 780m 的驱动加载了但是还是黑色”）。
+  - 用户通过 U 盘 OpenCore 引导进入恢复后的 macOS Tahoe 26.6.2，内核顺利引导，鼠标指针活动自如，但屏幕全黑无图形界面（“只有鼠标可以活动，什么都看不到，黑色的，应该是把 780m 的驱动加载了但是还是黑色”）。
 - **技术根因深度定位**：
   1. **本地 EFI 未开启 780M 硬件桥接与 AMFI 旁路**：
      - 本地 `config.plist` 此前将 `PhxBringup.kext` 与 `AMFIPass.kext` 均设为 `Enabled: false`。
-     - `boot-args` 缺少 NullArc 必需的启动参数：`amfi=0x80 amfi_get_out_of_my_way=0x1 -amfipassbeta ipc_control_port_options=0 phxdebug=1`。
+     - `boot-args` 缺少 [NullArc](https://github.com/luuumi-dev/nullarc) 必需的启动参数：`amfi=0x80 amfi_get_out_of_my_way=0x1 -amfipassbeta ipc_control_port_options=0 phxdebug=1`。
      - 在 macOS Tahoe（Darwin 25）中，系统去除了 CPU 软解 Quartz 渲染器，WindowServer 在缺少 Metal 显卡驱动或签名校验拦截时无法合成桌面窗口，导致画布为全黑，仅顶层硬件光标图层正常跟踪鼠标。
-  2. **NullArc 官方文档记载的已知特性（登录窗口全黑）**：
-     - NullArc 官方开发文档 `INSTALL.md` 明确说明：
+  2. **[NullArc](https://github.com/luuumi-dev/nullarc) 官方文档记载的已知特性（登录窗口全黑）**：
+     - [NullArc](https://github.com/luuumi-dev/nullarc) 官方开发文档 `INSTALL.md` 明确说明：
        > *"With --windowserver, turn on automatic login... the login window may come up black on the GPU path."*
-     - 当镜像中部署了 NullArc GPU 驱动及 `--windowserver` 守护进程后，macOS 的原生登录界面（`loginwindow`）在 GPU 合成路径上**无法渲染出 UI 元素，呈现完全黑屏**！
+     - 当镜像中部署了 [NullArc](https://github.com/luuumi-dev/nullarc) GPU 驱动及 `--windowserver` 守护进程后，macOS 的原生登录界面（`loginwindow`）在 GPU 合成路径上**无法渲染出 UI 元素，呈现完全黑屏**！
       - 此时系统并非卡死，而是在静默等待登录。输入你自己的 macOS 登录密码并回车，即可继续进入桌面。
 - **配置修复与验证**：
   1. **启用 Radeon 780M 驱动**：`PhxBringup.kext` ➔ `Enabled: true`（MinKernel: `25.0.0`）。
@@ -148,8 +148,8 @@
 
 ---
 
-### 轮次 12：macOS Tahoe 26.x 声音与麦克风驱动框架补全 (Turn 12)
-- **现象定位**：进入系统后音频与麦克风无设备识别；macOS Tahoe 26.x 原生彻底移除了 `AppleHDA.kext` 和 `IOHDAFamily.kext`，导致 `AppleALC.kext` 无底层 HDA 总线挂载。此外，无界 14 Pro 声卡芯片实际报码为 Senary CX8070 (`0x14F11F87`)，而公版 AppleALC 仅收录了 `0x14F11F86`。
+### 轮次 12：macOS Tahoe 26.6.2 声音与麦克风驱动框架补全 (Turn 12)
+- **现象定位**：进入系统后音频与麦克风无设备识别；macOS Tahoe 26.6.2 原生彻底移除了 `AppleHDA.kext` 和 `IOHDAFamily.kext`，导致 `AppleALC.kext` 无底层 HDA 总线挂载。此外，无界 14 Pro 声卡芯片实际报码为 Senary CX8070 (`0x14F11F87`)，而公版 AppleALC 仅收录了 `0x14F11F86`。
 - **修复方案与落实**：
   1. 引入专为 Darwin 25/26 编译的完整 `AppleHDA.kext` 驱动套件（含 `IOHDAFamily`、`AppleHDAController`、`DspFuncLib`、`AppleHDAHardwareConfigDriver`）。
   2. 严格按依赖树顺序将驱动注入 `config.plist` 的 `Kernel ➔ Add`（置于 `AppleALC.kext` 之前）。
@@ -164,7 +164,7 @@
   - 在配置保存过程中，`IntelBTPatcher.kext` 被配置编辑器重新勾选为 `True`。
   - 重启后机器发生 **Early Boot Panic**，直接呈现“跑一堆条后卡死并瞬间重启回到 OpenCore”的无休止死循环。
 - **致命根因诊断**：
-  - 苹果在现代 macOS（Sonoma 14+ / Sequoia 15+ / Tahoe 26+）中重构了蓝牙协议栈，彻底移除并重排了私有符号表。`IntelBTPatcher.kext` 强行 Hook 私有符号直接触发内核内存陷阱（Kernel Trap 14）。
+  - 苹果在现代 macOS（Sonoma 14+ / Tahoe 26+）中重构了蓝牙协议栈，彻底移除并重排了私有符号表。`IntelBTPatcher.kext` 强行 Hook 私有符号直接触发内核内存陷阱（Kernel Trap 14）。
 
 ---
 
@@ -186,7 +186,7 @@
 - **用户实机抓拍现场分析**：
   - 屏幕显示：`map_with_linking_np: [479(mesboot)]: region 0, not code signed`，随后伴随 Wi-Fi 信号轮询 `LQM-WiFi...` 重复刷新，等待约 90 秒后黑屏自动重启。
   - **关键真相 1：引导已完全成功进用户态！**  
-    PID 479 为 NullArc 核显加速辅助工具 `/Users/Shared/gpu/phxctl/mesboot`。“region 0, not code signed”仅为开源二进制无签名常规告警，证明 OpenCore 和 Kernel 驱动阶段已经 100% 通过！
+    PID 479 为 [NullArc](https://github.com/luuumi-dev/nullarc) 核显加速辅助工具 `/Users/Shared/gpu/phxctl/mesboot`。“region 0, not code signed”仅为开源二进制无签名常规告警，证明 OpenCore 和 Kernel 驱动阶段已经 100% 通过！
   - **关键真相 2：重启是由 phxboot.sh 看门狗触发！**  
     因音频总线冲突或窗口服务超时，用户态显卡引导脚本 `phxboot.sh` 检测到 `WindowServer` 未能正常渲染，脚本主动触发了内建的 `shutdown -r now` 保护指令。
   - **关键真相 3：NVRAM 遗留挂起锁导致开机“连环重启”！**  
@@ -218,7 +218,7 @@
     1. 新增 `Display-Override.kext` 并伪装 `com.apple.driver.AppleBacklightDisplay`。
     2. 修改 `VoodooPS2Keyboard.kext` 注入 F8~F12 快捷键与 Win/Alt 交换，但包含非 ASCII 字符注释。
 - **真凶定性**：
-  - `Display-Override.kext` 强行将 `AppleBacklightDisplay` 挂载到 AMD 780M Framebuffer（由 NullArc `PhxBringup.kext` 管理）上，由于缺少苹果原生背光硬件寄存器，在显示流水线初始化（进度条过半）瞬间触发空指针/死锁崩溃。
+  - `Display-Override.kext` 强行将 `AppleBacklightDisplay` 挂载到 AMD 780M Framebuffer（由 [NullArc](https://github.com/luuumi-dev/nullarc) `PhxBringup.kext` 管理）上，由于缺少苹果原生背光硬件寄存器，在显示流水线初始化（进度条过半）瞬间触发空指针/死锁崩溃。
 - **治理与修复方案**：
   1. **彻底剔除 `Display-Override.kext`**（分辨率切换应交由用户层工具如 BetterDisplay，禁止在内核层做伪装注入）。
   2. **规范化 `VoodooPS2Keyboard` 映射表**：保留 F8 静音(`42=4a`)、F9 降音量(`43=49`)、F10 增音量(`44=48`)、F11 降亮度(`57=90`)、F12 增亮度(`58=91`)，以及 `Swap command and option`（Win=Cmd, Alt=Opt），剔除可能引发解析隐患的非 ASCII 字符。
@@ -226,17 +226,10 @@
 
 ---
 
-### 轮次 18：数字麦克风驱动 (AMDMicrophone.kext) 启动加载冲突与脚本安装方案
-- **技术排查背景**：
-  - 用户在 20:29 尝试让内置麦克风工作，注入了针对 AMD APU 的 `AMDMicrophone.kext` 并备份了 `config.plist.before_mic_bak`，随后系统再次卡死无法引导。
-- **真凶定性**：
-  - `AMDMicrophone.kext` 匹配 PCI `0x15e21022`（AMD ACP 6.3 协处理器）。在 AMD Zen 4 架构下，缺少 Linux 官方 ACP DSP 固件上下文，驱动直接调用未时钟初始化的 BAR0 寄存器复位和 DMA 分配，直接导致 **PCI 内部总线锁死（PCI Bus Freeze）**，引发系统挂起。
-- **治理与修复方案**：
-  1. 不在 OpenCore `Kernel ➔ Add` 中加载 `AMDMicrophone.kext`。该驱动依赖较晚加载的 IOAudioFamily，应在 macOS 启动后安装到 `/Library/Extensions/`。公开仓库将驱动放在 `drivers/AMDMicrophone.kext/`，通过 `scripts/一键部署麦克风.command` 安装。
-  2. 还原 `VoodooHDA_BL.kext/Contents/Info.plist` 去除强加的 `OSBundleCompatibleVersion`。
-  3. 保留用户在 17:25 调整的键盘偏好（`57=6b`, `58=71`, `LogScanCodes=1`）。
-  4. 固化为版本 `v1.9_TEST_REMOVE_AMDMICROPHONE`，`ocvalidate` 校验 0 错误。
-
+### 轮次 18：AMDMicrophone 内置数字麦克风部署方式
+- 本机尝试在 OpenCore 启动阶段加载麦克风驱动时发生启动卡死。
+- 当前公开方案改为在 macOS 桌面启动后，使用[部署辅助脚本](../scripts/一键部署麦克风.command)；驱动来源与具体要求以 [AMDMicrophone 上游项目](https://github.com/qhuyduong/AMDMicrophone) 为准。
+- 此记录仅描述本机测试结果，不代表所有 AMD ACP 设备均兼容。
 ---
 
 ## ☠️ 死亡记录与黑苹果血泪避坑档案 (The Hall of Crash & Hangs)
@@ -253,6 +246,6 @@
 | **💀 死亡案例 6** | **`ProvideMaxSlide=100`**<br>(内存检索上限约束) | **第二阶段安装报禁止标志 🚫**：报 `Err(0xE) <- EB.MM.AKMR`。 | 强制 OpenCore 仅在 0~200MB 物理内存内检索。第二阶段安装需 748MB 连续内存盘，硬塞碰撞导致内存分配失败中止。 | **必须设为 `ProvideMaxSlide=0`！** 开放全部 256 个 Slide 区间供检索。 |
 | **💀 死亡案例 7** | **AMD Zen 4 XHCI 芯片**<br>(USB 中断延迟 Bug) | **几秒动一次超卡假死**：安装界面鼠标肉眼可见几秒才刷新一次。 | 原生 `AppleUSBXHCIPCI` 缺少针对 AMD 控制器的状态轮询唤醒，USB 键盘鼠标数据包在队列中堆积 2~3 秒才批量上报。 | **注入 `XhciNudge.kext` 并添加 `xhcinudge=1` 启动参数！** 主动周期唤醒状态轮询。 |
 | **💀 死亡案例 8** | **`Display-Override.kext`**<br>(伪装 AppleBacklightDisplay) | **白苹果进度条过半死锁**：苹果进度条走到 1/3~1/2（显卡切换瞬间）画面永久冻结。 | 驱动强行挂载 `AppleBacklightDisplay` 类到 AMD 780M Framebuffer。AMD DC 缺乏苹果原生背光寄存器支持，引发显示服务空指针崩溃死锁。 | **【铁律】禁止给 AMD 780M 注入此类伪装驱动！**<br>彻底移除该 kext；分辨率与 HiDPI 缩放改用系统用户层工具（如 BetterDisplay）。 |
-| **💀 死亡案例 9** | **`AMDMicrophone.kext`**<br>(ACP 6.3 麦克风协处理器驱动) | **PCI 总线挂起 / 进系统前死机**：白苹果进度条或进用户态瞬间黑屏死机。 | 针对旧 APU (Renoir/Cezanne) 开发的驱动，直接向 Phoenix (Zen 4) 的 ACP 6.3 发送裸寄存器复位和 DMA 指令。在无 PSP 固件握手下，导致 PCI Fabric 总线超时硬挂起。 | **禁止在 AMD Zen 4 上盲目加载此类 ACP 驱动！**<br>本机实测工作流是进入系统后运行部署脚本；不要在 OpenCore 启动阶段直接加载。不同 CPU 变体的兼容性仍需以实测为准。 |
+| **💥 死亡案例 9** | [AMDMicrophone](https://github.com/qhuyduong/AMDMicrophone)<br>（内置数字麦克风） | **OpenCore 阶段加载会导致启动卡死（本机实测）** | 本机测试表明，启动阶段直接加载不稳定，应将驱动部署与 OpenCore 引导分开处理。 | **使用[部署脚本](../scripts/一键部署麦克风.command)，在系统启动后按上游说明操作。** |
 
 

@@ -453,7 +453,7 @@
 				<key>BundlePath</key>
 				<string>AirportItlwm.kext</string>
 				<key>Comment</key>
-				<string>Tahoe 26.x AirportItlwm alpha; AX200 native Wi-Fi</string>
+				<string>Tahoe 26.6.2 AirportItlwm alpha; AX200 native Wi-Fi</string>
 				<key>Enabled</key>
 				<true/>
 				<key>ExecutablePath</key>
