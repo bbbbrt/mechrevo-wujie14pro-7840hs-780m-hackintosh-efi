@@ -1,0 +1,25 @@
+# macOS Finder junk
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows junk
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# OpenCore debug logs
+opencore-*.txt
+opencore.txt
+
+# Backup files
+*.bak
+*.bak-*
+*.old
+
+.contentFlavour
+
+.contentVisibility
