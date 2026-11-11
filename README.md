@@ -37,7 +37,7 @@ Hardware-specific OpenCore EFI configuration, troubleshooting notes, and macOS h
 | **Wi-Fi** | Intel Wi-Fi 6 AX200 (802.11ax) | :white_check_mark: AirportItlwm Native UI |
 | **Bluetooth** | Intel AX200 Bluetooth 5.2 (`8087:0029`) | :white_check_mark: BlueToolFixup + Firmware |
 | **Audio** | Senary (Conexant) CX8070 Codec (`14F1:1F87`) | :white_check_mark: Speaker & Headphone Out |
-| **Microphone** | Internal AMD ACP digital microphone | [AMDMicrophone](https://github.com/qhuyduong/AMDMicrophone) · [Deployment script](scripts/一键部署麦克风.command) |
+| **Microphone** | Internal AMD ACP digital microphone ([AMDMicrophone](https://github.com/qhuyduong/AMDMicrophone)) | :white_check_mark: Works after macOS boots · [Deployment script](scripts/一键部署麦克风.command) |
 | **Touchpad** | I2C HID Precision Multi-touch Touchpad | :white_check_mark: VoodooI2C Gestures |
 | **Keyboard** | PS/2 Keyboard with Custom Fn Hotkeys (Volume, Brightness) | :white_check_mark: VoodooPS2 Remapped |
 | **Battery** | Integrated Li-Polymer Battery (`F166003A`) | :white_check_mark: SMCBatteryManager |
@@ -171,7 +171,7 @@ This table summarizes the root causes and permanent fixes discovered during hard
 | **无线网卡** | Intel Wi-Fi 6 AX200 无线网卡 (802.11ax) | :white_check_mark: AirportItlwm 原生 Wi-Fi 选网 |
 | **蓝牙模块** | Intel AX200 蓝牙 5.2 (`8087:0029`) | :white_check_mark: 蓝牙耳机与键鼠稳定配对 |
 | **声卡芯片** | 新格 CX8070 声卡芯片 (`14F1:1F87`) | :white_check_mark: 扬声器外放与耳机输出正常 |
-| **内置麦克风** | [AMDMicrophone](https://github.com/qhuyduong/AMDMicrophone) | [部署脚本](scripts/一键部署麦克风.command) · [上游项目](https://github.com/qhuyduong/AMDMicrophone) |
+| **内置麦克风** | [AMDMicrophone](https://github.com/qhuyduong/AMDMicrophone) | :white_check_mark: 进入系统后通过[部署脚本](scripts/一键部署麦克风.command)加载正常 |
 | **触控面板** | I2C HID 协议精密多点触控板 | :white_check_mark: VoodooI2C 原生多指手势丝滑跟手 |
 | **笔记本键盘** | PS/2 键盘，深度重映射多媒体功能键 | :white_check_mark: F8-F10 调音量、F11-F12 调亮度 |
 | **电池管理** | 原装锂聚合物电池 (`F166003A`) | :white_check_mark: SMCBatteryManager 准确显示百分比 |
