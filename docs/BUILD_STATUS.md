@@ -6,8 +6,8 @@
 - EFI 已同步为 2026-11-19 实际启动 ESP 中的 BOOT 与 OpenCore 文件；公开 SMBIOS 字段已清空。
 - NullArc 启动：Xcode first-launch check、SMU、GART、MES、KIQ/GFX、Metal 4096/4096、AGDC 和内屏帧管线检查通过。
 - Wi-Fi / 蓝牙：ForbiddenItlwm 0.6.0-beta.2、BTLEAdvFixup 0.9.3、IntelBluetoothFirmware 2.5.2；AirportItlwm 关闭。AirDrop 已在 26.7.3 实测可用，其他系统版本未验证。
-- 触控板驱动链已加载，但触控事件和多指手势仍需手动回归；见 docs/触控板诊断记录-2026-11-19.md。
-- USB-C 一线连与 Type-C 转 HDMI 均已确认可用；HDMI 精确分辨率/刷新率未记录。睡眠 / 唤醒仍未完成验证。
+- 触控板输入、点击及多指手势已在当前实机环境测试通过；早期诊断记录仅代表当时状态。
+- USB-C 一线连与 Type-C 转 HDMI 均已确认可用；睡眠、唤醒及合盖恢复已在当前实机环境测试通过。HDMI 精确分辨率/刷新率未记录。
 - 历史记录中的个别故障归因属于当时观察，不代表所有设备均适用。
 
 > 公开说明：本文是开发过程的历史排错日志，不代表当前所有功能都已在所有系统版本完整验证。部分早期根因分析属于当时的诊断假设，应以实机日志和上游文档重新确认。个人密码及本机目录路径已清理。

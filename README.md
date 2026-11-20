@@ -12,7 +12,7 @@
 >
 > **安全红线：**绝不写入或格式化内置系统盘/数据盘。默认不格式化整个 U 盘，不删除已有 macOS 安装器或个人文件。若缺少 EFI 分区，先展示磁盘型号、容量、设备标识、分区方案和影响，等待我明确确认后才可分区/格式化。无法确认目标盘时立即停止。不得擅自修改 ACPI、config.plist、Kext 或启动参数。
 >
-> **重要：**本项目 EFI ZIP 只有引导文件，不包含完整 macOS 安装器。公开配置中的 Serial、MLB、UUID、ROM 是示例值，必须提醒我生成自己的 SMBIOS（机型身份信息），不得擅自编造或把示例值当成真实值。若当前环境无法可靠识别磁盘或执行文件操作，应如实说明并给出人工步骤，不得假装完成。
+> **重要：**本项目 EFI ZIP 只有引导文件，不包含完整 macOS 安装器。公开配置已清空个人 SMBIOS（机型身份信息）：Serial、MLB 为空，SystemUUID 与 ROM 为全零。首次使用前请为自己的机器生成并填写唯一值；这不影响本项目原机的实机测试结果。若当前环境无法可靠识别磁盘或执行文件操作，应如实说明并给出人工步骤，不得假装完成。
 >
 > 先检查并展示识别到的 U 盘，确认目标后再部署；每个破坏性操作都必须单独征求确认。
 >
@@ -53,7 +53,7 @@
 ---
 
 
-> **2026-11-20 实机更新**：当前 EFI 基于 macOS Tahoe 26.7.3（25G342 / Darwin 25.6.0）实机配置。USB-C 一线连显示器和 Type-C 转 HDMI 两种外接显示方式均已由用户实机确认可用；Intel AX200 的 AirDrop 也已在 26.7.3 上实测可用。公开 config.plist 已清空个人 SMBIOS 信息，首次使用必须自行生成。
+> **2026-11-20 实机更新**：当前 EFI 基于 macOS Tahoe 26.7.3（25G342 / Darwin 25.6.0）实机配置。USB-C 一线连显示器和 Type-C 转 HDMI 两种外接显示方式均已由用户实机确认可用；Intel AX200 的 AirDrop 也已在 26.7.3 上实测可用。睡眠/唤醒、合盖恢复及触控板多指手势均已在本机实测通过。公开 config.plist 已清空个人 SMBIOS 信息，其他用户首次使用前须自行生成并填写。
 
 ## 2026-11-20 兼容性与稳定性提示
 
@@ -244,7 +244,7 @@ This table summarizes the root causes and permanent fixes discovered during hard
 3. **Intel AX200 无线网卡**：
    - 当前 EFI 启用 `ForbiddenItlwm.kext` 0.5.4；Wi-Fi 驱动已部署，AirDrop 需在 macOS 26.7.3 上重新验证。
 4. **I2C 触控板驱动**：
-   - 已按 `VoodooGPIO` -> `VoodooI2CServices` -> `VoodooInput` -> `VoodooI2C` -> `VoodooI2CHID` 顺序加载；26.7.3 下输入报告和多指手势尚待实机复测。
+   - 已按 `VoodooGPIO` -> `VoodooI2CServices` -> `VoodooInput` -> `VoodooI2C` -> `VoodooI2CHID` 顺序加载；26.7.3 下触控板输入、点击及多指手势均已实机测试通过。
 5. **定制键盘快捷键映射**：
    - F8 静音、F9 降音量、F10 增音量；F11 降亮度、F12 增亮度；自动互换 Win 与 Alt 键位（实现 Mac 标准 Cmd 与 Opt 布局）。
 
