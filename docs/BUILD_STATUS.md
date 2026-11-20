@@ -1,9 +1,19 @@
 # WUJIE14 Pro / Ryzen 7 7840HS — EFI 状态与迭代记录
+> 最新实机状态：macOS Tahoe 26.7.3（Build 25G342 / Darwin 25.6.0），2026-11-20。USB-C 一线连与 Type-C 转 HDMI 均已实机确认可用；Intel AX200 隔空投送在 26.7.3 上实测可用。注意：26.7.3 下 NullArc 更容易触发降级保护，可能导致 WindowServer 重启或图形会话退出。下方历史轮次仅作为开发记录。
+
+## 当前实机状态（2026-11-20）
+
+- EFI 已同步为 2026-11-19 实际启动 ESP 中的 BOOT 与 OpenCore 文件；公开 SMBIOS 字段已清空。
+- NullArc 启动：Xcode first-launch check、SMU、GART、MES、KIQ/GFX、Metal 4096/4096、AGDC 和内屏帧管线检查通过。
+- Wi-Fi / 蓝牙：ForbiddenItlwm 0.6.0-beta.2、BTLEAdvFixup 0.9.3、IntelBluetoothFirmware 2.5.2；AirportItlwm 关闭。AirDrop 已在 26.7.3 实测可用，其他系统版本未验证。
+- 触控板驱动链已加载，但触控事件和多指手势仍需手动回归；见 docs/触控板诊断记录-2026-11-19.md。
+- USB-C 一线连与 Type-C 转 HDMI 均已确认可用；HDMI 精确分辨率/刷新率未记录。睡眠 / 唤醒仍未完成验证。
+- 历史记录中的个别故障归因属于当时观察，不代表所有设备均适用。
 
 > 公开说明：本文是开发过程的历史排错日志，不代表当前所有功能都已在所有系统版本完整验证。部分早期根因分析属于当时的诊断假设，应以实机日志和上游文档重新确认。个人密码及本机目录路径已清理。
 
 ## 目标环境
-- 目标系统：macOS Tahoe 26.6.2（当前实测版本）
+- 目标系统：macOS Tahoe 26.7.3（当前实测版本）
 - 硬件架构：AMD Ryzen 7 7840HS (8 核 16 线程, Zen 4 Phoenix) / Radeon 780M (RDNA 3)
 - 引导工具：OpenCore 1.0.8 DEBUG
 - 镜像状态：**已成功进入 macOS 恢复界面（Recovery UI）**！
@@ -232,20 +242,23 @@
 - 此记录仅描述本机测试结果，不代表所有 AMD ACP 设备均兼容。
 ---
 
-## ☠️ 死亡记录与黑苹果血泪避坑档案 (The Hall of Crash & Hangs)
-
-本项目在 AMD Ryzen 7 7840HS (Zen 4 Phoenix) / Radeon 780M 适配过程中，踩过的所有**致命崩溃（死循环、卡死、黑屏）**技术归档：
-
-| 死亡案例编号 | 触发组件 / 操作 | 致命死因现象 | 底层技术机理剖析 | 终极解法 / 避坑准则 |
-| :---: | :--- | :--- | :--- | :--- |
-| **💀 死亡案例 1** | **`IntelBTPatcher.kext`**<br>(Intel AX200 蓝牙补丁) | **Early Boot Panic 死循环**：跑一堆 Verbose 条码后瞬间 Kernel Panic 并黑屏自动重启回到 OpenCore。 | macOS 14/15/26 彻底重构了蓝牙协议栈，移除了旧私有符号。驱动强行 Hook 不存在的内核符号触发内核内存陷阱 (Kernel Trap 14)。 | **【铁律】在现代 macOS 下永久禁用！**<br>保持 `IntelBTPatcher.kext ➔ Enabled: False`，仅保留 `IntelBluetoothFirmware` 与 `BlueToolFixup`。 |
-| **💀 死亡案例 2** | **`MechrevoFan.kext`**<br>(机械革命风扇控制) | **硬件看门狗瞬间重启**：驱动注入瞬间主板硬件级强行掉电重启。 | 驱动直接通过 I/O 端口 `0x66/0x68` 并发无锁读写嵌入式控制器（EC）。在 AMD Zen 4 架构下，与 ACPI 产生严重硬件资源争用，导致 EC 控制器挂起死锁。 | **禁止裸读写 EC 端口！**<br>在无专用 AMD ACPI 互斥锁补丁前，保持该 kext 为 `False`。 |
-| **💀 死亡案例 3** | **`VoodooHDA_BL.kext`**<br>(错配 Codec 0 注入 Node 26) | **音频总线死锁与看门狗重启**：进入用户态后，屏幕定格在 `mesboot` 与 `LQM-WiFi`，90 秒后重启。 | 将内置麦克风 Node 26 强行绑在 `Codec 0` 上。但在 7840HS 上，`Codec 0` 是 780M HDMI/DP 数字音频，无此模拟引脚。CoreAudio 启动时向 HDMI 下发模拟麦克风配置，导致音频总线发生 CORB/RIRB 超时死锁。 | **禁止在 Codec 0 注入模拟音频节点！**<br>移除非法 NodesToPatch 节点，保持干净基线。 |
-| **💀 死亡案例 4** | **`SSDT-PNLF.aml`**<br>(公版屏幕背光补丁) | **低端内存踩踏卡死**：卡在 `pci (build ...), flags 0xc0080` 阶段无法推进。 | 公版 SSDT-PNLF 包含错误的 `_UID 0x0E` 或与主板 IVRS/MMIO 映射冲突，导致低端物理内存被意外修改。 | 必须使用专为 Phoenix 平台重写、精确匹配 ACPI 路径的 PNLF 补丁，严禁套用 Intel 笔记本公版。 |
-| **💀 死亡案例 5** | **NVRAM 遗留状态**<br>(phxboot.pending 挂起锁) | **连环重启“躺枪”**：明明改回了正确 EFI，开机依然自动重启。 | macOS 脚本在异常崩溃时向主板 NVRAM 写入未完成标志。开机检测到上次未完成，守护进程再次强行重启。 | **修改排错后必须按空格执行一次 `Reset NVRAM`！** 彻底清空主板异常状态位。 |
-| **💀 死亡案例 6** | **`ProvideMaxSlide=100`**<br>(内存检索上限约束) | **第二阶段安装报禁止标志 🚫**：报 `Err(0xE) <- EB.MM.AKMR`。 | 强制 OpenCore 仅在 0~200MB 物理内存内检索。第二阶段安装需 748MB 连续内存盘，硬塞碰撞导致内存分配失败中止。 | **必须设为 `ProvideMaxSlide=0`！** 开放全部 256 个 Slide 区间供检索。 |
-| **💀 死亡案例 7** | **AMD Zen 4 XHCI 芯片**<br>(USB 中断延迟 Bug) | **几秒动一次超卡假死**：安装界面鼠标肉眼可见几秒才刷新一次。 | 原生 `AppleUSBXHCIPCI` 缺少针对 AMD 控制器的状态轮询唤醒，USB 键盘鼠标数据包在队列中堆积 2~3 秒才批量上报。 | **注入 `XhciNudge.kext` 并添加 `xhcinudge=1` 启动参数！** 主动周期唤醒状态轮询。 |
-| **💀 死亡案例 8** | **`Display-Override.kext`**<br>(伪装 AppleBacklightDisplay) | **白苹果进度条过半死锁**：苹果进度条走到 1/3~1/2（显卡切换瞬间）画面永久冻结。 | 驱动强行挂载 `AppleBacklightDisplay` 类到 AMD 780M Framebuffer。AMD DC 缺乏苹果原生背光寄存器支持，引发显示服务空指针崩溃死锁。 | **【铁律】禁止给 AMD 780M 注入此类伪装驱动！**<br>彻底移除该 kext；分辨率与 HiDPI 缩放改用系统用户层工具（如 BetterDisplay）。 |
-| **💥 死亡案例 9** | [AMDMicrophone](https://github.com/qhuyduong/AMDMicrophone)<br>（内置数字麦克风） | **OpenCore 阶段加载会导致启动卡死（本机实测）** | 本机测试表明，启动阶段直接加载不稳定，应将驱动部署与 OpenCore 引导分开处理。 | **使用[部署脚本](../scripts/一键部署麦克风.command)，在系统启动后按上游说明操作。** |
 
 
+---
+
+<!-- HW-OUTPUT-BT-K580-20261119 -->
+### 轮次 19：USB-C DP 与 QGeeM HDMI 输出回归（2026-11-19）
+
+- 设备：机械革命无界 14 Pro，Ryzen 7 7840HS / Radeon 780M；macOS Tahoe 26.7.3（25G342）。
+- USB-C DP 直连已验证两通道 HBR2，2560×1440 @ 60Hz；内屏维持 2880×1800 @ 120Hz。
+- QGeeM USB-C 多功能扩展坞的 HDMI 输出在本轮更新并重启后由用户实机确认恢复正常；未记录该 HDMI 输出的精确分辨率/刷新率。
+- 本轮没有刷写 VBIOS；VBIOS 仅作为本机诊断资料。
+
+### 轮次 20：Intel AX200 / Logitech K580 蓝牙修复（2026-11-19）
+
+- 故障表现：连接 K580 时蓝牙图标短暂关闭再开启；日志中 bluetoothd 反复退出，launchd 随后重新拉起。
+- 控制器：Intel AX200 蓝牙 USB ID 8087:0029；系统 macOS Tahoe 26.7.3（25G342 / Darwin 25.6.0）。
+- 驱动升级：IntelBluetoothFirmware 2.4.0 → 2.5.2；BTLEAdvFixup 0.9.1 → 0.9.3；ForbiddenItlwm 0.5.4 → 0.6.0-beta.2；BlueToolFixup 2.7.2 保持不变。
+- 配置：禁用 AirportItlwm，启用 BTLEAdvFixup 与 ForbiddenItlwm；IntelBTPatcher 继续禁用，保留其他配置。
+- 重启后检查：蓝牙 State=On；bluetoothd 持续运行；实际加载版本与更新目标一致；I/O Registry 中 BTLEAdvEventPipes=1、BTLEAdvHookRouted=1、BTLEAdvPipeHooks=5。用户确认重启后蓝牙恢复正常。
+- 详细过程、回滚方式和上游来源见 docs/BLUETOOTH-K580-FIX.md。

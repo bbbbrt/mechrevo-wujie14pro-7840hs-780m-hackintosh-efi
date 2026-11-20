@@ -1,7 +1,42 @@
 # Mechrevo Wujie 14 Pro — Ryzen 7 7840HS + Radeon 780M Hackintosh EFI
 
+> ## 🤖 AI Agent 一键部署提示词（中文）
+>
+> 你是本项目的 Hackintosh EFI 部署助手。优先从本仓库 GitHub Releases 获取最新正式版 EFI ZIP 和 SHA256SUMS。若仓库尚无正式 Release，则使用 main 分支的 `release/Mechrevo-Wujie14Pro-7840HS-780M-EFI.zip` 与 `release/SHA256SUMS.txt`，作为未打标签的候选包部署，并在结果中明确说明。
+>
+> 1. 先只读检查当前系统、磁盘、USB 设备；通过设备型号、容量、总线/连接方式识别目标 U 盘，不能仅凭盘符猜测。
+> 2. 下载最新正式 Release 资产，校验 ZIP 完整性和 SHA-256；校验失败、Release 不存在或资产不完整时停止。
+> 3. 若 U 盘已有 EFI 分区，先备份原 EFI 文件夹，再仅将压缩包内的 `EFI` 文件夹复制到该分区根目录，确保最终为 `EFI/BOOT` 和 `EFI/OC`。
+> 4. 检查 `EFI/OC/config.plist` 可解析，`EFI/BOOT/BOOTx64.efi`、`EFI/OC/OpenCore.efi` 存在，并确认文件写入的是目标 U 盘。
+> 5. 报告设备型号、容量、分区、备份位置、Release 版本、SHA-256 和部署结果；没有真实启动测试就不得声称启动成功。
+>
+> **安全红线：**绝不写入或格式化内置系统盘/数据盘。默认不格式化整个 U 盘，不删除已有 macOS 安装器或个人文件。若缺少 EFI 分区，先展示磁盘型号、容量、设备标识、分区方案和影响，等待我明确确认后才可分区/格式化。无法确认目标盘时立即停止。不得擅自修改 ACPI、config.plist、Kext 或启动参数。
+>
+> **重要：**本项目 EFI ZIP 只有引导文件，不包含完整 macOS 安装器。公开配置中的 Serial、MLB、UUID、ROM 是示例值，必须提醒我生成自己的 SMBIOS（机型身份信息），不得擅自编造或把示例值当成真实值。若当前环境无法可靠识别磁盘或执行文件操作，应如实说明并给出人工步骤，不得假装完成。
+>
+> 先检查并展示识别到的 U 盘，确认目标后再部署；每个破坏性操作都必须单独征求确认。
+>
+> ---
+>
+> ## 🤖 AI Agent One-Click Deployment Prompt (English)
+>
+> You are this project's Hackintosh EFI deployment assistant. Download the **latest stable GitHub Release** EFI ZIP and SHA256SUMS, then deploy the EFI to the USB drive I designate so I can test USB boot first.
+>
+> 1. Begin with read-only inspection of the OS, disks, and USB devices. Identify the target using its model, capacity, and connection/bus information; never guess from a drive letter alone.
+> 2. Prefer the latest stable GitHub Release assets. If no stable Release exists yet, use `release/Mechrevo-Wujie14Pro-7840HS-780M-EFI.zip` and `release/SHA256SUMS.txt` from the repository main branch; label this as an untagged candidate package and disclose that it is not a formal Release.
+> 3. If the USB already has an EFI partition, back up its existing EFI folder. Copy only the package's `EFI` folder to the root of that partition; the final layout must be `EFI/BOOT` and `EFI/OC`.
+> 4. Verify that `EFI/OC/config.plist` parses, `EFI/BOOT/BOOTx64.efi` and `EFI/OC/OpenCore.efi` exist, and the files were written to the intended USB drive.
+> 5. Report the device model, capacity, partition, backup location, Release version, SHA-256, and result. Never claim a successful boot unless it was actually tested.
+>
+> **Safety rules:** Never write to or format internal system/data disks. Do not format the whole USB by default or remove an existing macOS installer or personal files. If no EFI partition exists, show the disk model, capacity, device ID, proposed partition layout, and impact; wait for my explicit approval before partitioning or formatting. Stop if the target cannot be identified reliably. Do not modify ACPI, config.plist, Kexts, or boot arguments without approval.
+>
+> **Important:** This EFI ZIP contains boot files only, not a complete macOS installer. The public Serial, MLB, UUID, and ROM are placeholders; remind me to generate my own SMBIOS identity values. Never invent values or present placeholders as real. If the environment cannot reliably identify disks or perform file operations, say so and provide manual steps instead.
+>
+> Start by showing the USB drive identified through read-only inspection. Deploy only after the target is confirmed; obtain separate approval for every destructive operation.
+
+---
 [![OpenCore](https://img.shields.io/badge/OpenCore-1.0.8-blue.svg)](https://github.com/acidanthera/OpenCorePkg)
-[![macOS Tested](https://img.shields.io/badge/Tested-macOS%20Tahoe%2026.6.2-success)](https://www.apple.com/macos/tahoe/)
+[![macOS Tested](https://img.shields.io/badge/Tested-macOS%20Tahoe%2026.7.3-success)](https://www.apple.com/macos/tahoe/)
 [![CPU](https://img.shields.io/badge/CPU-AMD%20Ryzen%207%207840HS-orange)](https://amd.com)
 [![GPU](https://img.shields.io/badge/iGPU-Radeon%20780M%20(Metal%20Accelerated)-red)](https://github.com/luuumi-dev/nullarc)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
@@ -17,10 +52,30 @@
 
 ---
 
+
+> **2026-11-20 实机更新**：当前 EFI 基于 macOS Tahoe 26.7.3（25G342 / Darwin 25.6.0）实机配置。USB-C 一线连显示器和 Type-C 转 HDMI 两种外接显示方式均已由用户实机确认可用；Intel AX200 的 AirDrop 也已在 26.7.3 上实测可用。公开 config.plist 已清空个人 SMBIOS 信息，首次使用必须自行生成。
+
+## 2026-11-20 兼容性与稳定性提示
+
+- **AirDrop（隔空投送）**：目前只有 macOS Tahoe 26.7.3 + 本仓库 AX200 驱动组合经过实机验证可用；其他 macOS 版本不作保证。若 AirDrop 是刚需，应优先选择 26.7.3。
+- **NullArc 显卡稳定性**：26.7.3 下 Radeon 780M 虽可正常接管内屏，但目前观察到更容易触发 NullArc 降级保护。降级过程中可能伴随 WindowServer 重启、黑屏或当前图形登录会话退出；这不是 EFI 对所有机器的稳定性保证。
+- **取舍建议**：需要 AirDrop 可选择 26.7.3，同时接受 NullArc 降级风险；更重视图形会话稳定性的用户，可等待后续 macOS / NullArc 更新或自行测试其他版本。后续 NullArc 上游升级及本项目改进可能改善这一情况。
+- **外接显示**：USB-C 一线连（DP Alt Mode）与 Type-C 转 HDMI 均已在本机实测可用；具体 HDMI 分辨率/刷新率尚未记录。
+
+## 2026-11-19 Test Records
+
+- [2026-11-20 实机更新与兼容性说明](docs/发布说明-2026-11-20.md)
+
+- [Physical verification](docs/实机验证记录-2026-11-19.md)
+- [Touchpad diagnostic](docs/触控板诊断记录-2026-11-19.md)
+- [SMBIOS setup](docs/SMBIOS配置指南.md)
+- [GitHub release checklist](docs/发布前检查清单.md)
+- [NullArc runtime scripts](scripts/nullarc-runtime/README.md)
+
 <a name="english"></a>
 # English
 
-Hardware-specific OpenCore EFI configuration, troubleshooting notes, and macOS helper scripts for the **Mechrevo Wujie 14 Pro (机械革命 无界14 Pro)** featuring the **AMD Ryzen 7 7840HS (Zen 4 Phoenix)** processor and **AMD Radeon 780M (RDNA 3)** integrated graphics. **Tested on macOS Tahoe 26.6.2.**
+Hardware-specific OpenCore EFI configuration, troubleshooting notes, and macOS helper scripts for the **Mechrevo Wujie 14 Pro (机械革命 无界14 Pro)** featuring the **AMD Ryzen 7 7840HS (Zen 4 Phoenix)** processor and **AMD Radeon 780M (RDNA 3)** integrated graphics. **Tested on macOS Tahoe 26.7.3.**
 
 ---
 
@@ -34,11 +89,11 @@ Hardware-specific OpenCore EFI configuration, troubleshooting notes, and macOS h
 | **Display** | 14.0" 2.8K (2880 × 1800), 16:10, 120Hz Refresh Rate, 100% sRGB | :white_check_mark: Native 120Hz & HiDPI |
 | **Memory** | 16GB / 32GB Dual-Channel DDR5 5600MHz | :white_check_mark: Working |
 | **Storage** | Dual M.2 PCIe 4.0 NVMe SSD slots | :white_check_mark: Native APFS |
-| **Wi-Fi** | Intel Wi-Fi 6 AX200 (802.11ax) | :white_check_mark: AirportItlwm Native UI |
+| **Wi-Fi** | Intel Wi-Fi 6 AX200 (802.11ax) | :white_check_mark: ForbiddenItlwm 0.6.0-beta.2; AirDrop verified on macOS 26.7.3 only |
 | **Bluetooth** | Intel AX200 Bluetooth 5.2 (`8087:0029`) | :white_check_mark: BlueToolFixup + Firmware |
 | **Audio** | Senary (Conexant) CX8070 Codec (`14F1:1F87`) | :white_check_mark: Speaker & Headphone Out |
 | **Microphone** | Internal AMD ACP digital microphone ([AMDMicrophone](https://github.com/qhuyduong/AMDMicrophone)) | :white_check_mark: Works after macOS boots · [Deployment script](scripts/一键部署麦克风.command) |
-| **Touchpad** | I2C HID Precision Multi-touch Touchpad | :white_check_mark: VoodooI2C Gestures |
+| **Touchpad** | I2C HID Precision Multi-touch Touchpad | :warning: Driver stack loads; gestures need post-update verification |
 | **Keyboard** | PS/2 Keyboard with Custom Fn Hotkeys (Volume, Brightness) | :white_check_mark: VoodooPS2 Remapped |
 | **Battery** | Integrated Li-Polymer Battery (`F166003A`) | :white_check_mark: SMCBatteryManager |
 | **Ports** | 2x USB 3.2 Gen 1 Type-A, 1x Full-featured Type-C, 1x USB4 Type-C, HDMI 2.1 | :white_check_mark: XhciNudge Zero-Lag |
@@ -50,12 +105,12 @@ Hardware-specific OpenCore EFI configuration, troubleshooting notes, and macOS h
 - [x] **Radeon 780M Metal 3 Hardware Acceleration**: Enabled via [NullArc](https://github.com/luuumi-dev/nullarc) userland Mesa RADV driver stack and `PhxBringup.kext`. Buttery-smooth desktop rendering, Launchpad, and animations.
 - [x] **120Hz Ultra-smooth Display**: Full support for native 2880x1800 @ 120Hz refresh rate.
 - [x] **Zero USB Mouse/Keyboard Latency**: Integrated `XhciNudge.kext` and `xhcinudge=1` boot-arg eliminate the notorious AMD Zen 4 XHCI input stutter bug.
-- [x] **Native Wi-Fi Control**: AirportItlwm provides native macOS menu bar Wi-Fi selection and high-speed wireless networking.
+- [x] **Wi-Fi / AirDrop**: Intel AX200 uses ForbiddenItlwm 0.6.0-beta.2 with BTLEAdvFixup 0.9.3; AirDrop has been verified on macOS 26.7.3 only.
 - [x] **Bluetooth Support**: Intel Bluetooth 5.2 pairs seamlessly with AirPods, mice, and keyboards via `IntelBluetoothFirmware` and `BlueToolFixup`.
-- [x] **Multi-touch Gestures**: Fluid pinch-to-zoom, two-finger scrolling, and Mission Control swipes via `VoodooI2C` and `VoodooI2CHID`.
+- [!] **I2C Touchpad**: VoodooI2C / VoodooI2CHID load and match the device, but input-report delivery and multi-touch gestures must be re-confirmed on 26.7.3; see the touchpad diagnostic.
 - [x] **Custom Keyboard Fn Shortcuts**: Volume mute/down/up (F8-F10), Brightness down/up (F11-F12), and swapped Win/Cmd keys.
 - [x] **Battery Status & Power Management**: Accurate percentage readouts, charging cycle count, and dynamic CPU frequency scaling.
-- [x] **Sleep & Wake**: Fast sleep and instant wake upon opening lid or pressing keys.
+- [!] **Sleep & Wake**: Not verified on 26.7.3. A previous test reported kPMPCIUnsupported; do not assume system sleep works.
 - [!] **Blind Login / Auto-login**: Due to [NullArc](https://github.com/luuumi-dev/nullarc) GPU pipeline architecture, the macOS `loginwindow` renders as a black screen until credentials are typed (or auto-login is enabled).
 
 ---
@@ -69,7 +124,7 @@ To streamline post-installation and hardware optimization, several one-click mac
 | **`一键解决分辨率_开启HiDPI.command`** | **Screen Resolution & HiDPI Optimizer**<br>• Removes quarantine flags from BetterDisplay.<br>• Cleans corrupt WindowServer display cache.<br>• Enables 1920x1200 retina scaling via one-key-hidpi. | Double-click to run in Terminal |
 | [AMDMicrophone](https://github.com/qhuyduong/AMDMicrophone) | [Deployment helper](scripts/一键部署麦克风.command) | [Upstream source](https://github.com/qhuyduong/AMDMicrophone) |
 | [NullArc graphics installer](scripts/一键安装NullArc显卡驱动.command) | Radeon 780M Metal 3 installer; follows the upstream two-stage reboot process. | [NullArc upstream](https://github.com/luuumi-dev/nullarc) |
-| [NullArc watchdog recovery script](scripts/NullArc显卡看门狗修复与复活.command) | Clears the GPU watchdog fallback state and helps recover 780M acceleration. | [NullArc upstream](https://github.com/luuumi-dev/nullarc) |
+| [NullArc status checker](scripts/NullArc显卡看门狗修复与复活.command) | Read-only check for GPU, framebuffer and Xcode first-launch status; it does not reboot or clear logs. | [NullArc upstream](https://github.com/luuumi-dev/nullarc) |
 
 ---
 
@@ -90,7 +145,7 @@ Before booting OpenCore, configure the following settings in your BIOS (press **
 ## 5. Quick Installation Guide
 
 ### Step 1: Prepare the USB Installer
-1. Create a bootable macOS Tahoe 26.6.2 installer USB flash drive.
+1. Create a bootable macOS Tahoe 26.7.3 installer USB flash drive.
 2. Mount the USB drive's EFI partition (`ESP`).
 3. Download the latest release from the [`release/`](release/) directory (or clone this repository).
 4. Copy the entire `EFI` folder (`BOOT` and `OC`) into the root of the USB drive's EFI partition.
@@ -109,7 +164,7 @@ To prevent Apple ID / iCloud / iMessage collisions, generate your own serial num
 1. Insert the USB drive and press **F12** (or F7) at power-on to select the USB boot device.
 2. In the OpenCore picker, press **Spacebar** to reveal auxiliary tools.
 3. Highlight **`Reset NVRAM`** and press **Enter**. The system will restart automatically.
-4. On the next OpenCore picker, choose **Install macOS Tahoe 26.6.2**.
+4. On the next OpenCore picker, choose **Install macOS Tahoe 26.7.3**.
 
 ### Step 4: Post-Installation, GPU Acceleration & HiDPI
 1. Once installation completes and you reach the macOS desktop, enable **Automatic Login**:
@@ -143,7 +198,7 @@ This table summarizes the root causes and permanent fixes discovered during hard
   - **[Acidanthera](https://github.com/acidanthera)** (OpenCorePkg, Lilu, VirtualSMC, AppleALC, VoodooPS2)
   - **[NullArc / luuumi-dev](https://github.com/luuumi-dev/nullarc)** (AMD Radeon 780M Metal graphics driver)
   - **[VoodooI2C Team](https://github.com/VoodooI2C/VoodooI2C)** (Touchpad multitouch support)
-  - **[OpenIntelWireless](https://github.com/OpenIntelWireless)** (AirportItlwm & IntelBluetoothFirmware)
+  - **[OpenIntelWireless](https://github.com/OpenIntelWireless)** (IntelBluetoothFirmware)
 - **[AMDMicrophone](https://github.com/qhuyduong/AMDMicrophone)** (AMD ACP 内置数字麦克风项目)
 
 ---
@@ -154,7 +209,7 @@ This table summarizes the root causes and permanent fixes discovered during hard
 
 机械革命 **无界 14 Pro (MECHREVO WUJIE14 PRO)** 搭载 **AMD 锐龙 7 7840HS (Zen 4 Phoenix)** 处理器与 **AMD Radeon 780M (RDNA 3)** 核显的实机深度调优 OpenCore 黑苹果引导与全套辅助脚本项目。
 
-本项目已在 **macOS Tahoe 26.6.2** 上完成实机测试；其他 macOS 版本尚未验证。
+本项目已在 **macOS Tahoe 26.7.3** 上完成实机测试；其他 macOS 版本尚未验证。
 
 ---
 
@@ -168,11 +223,11 @@ This table summarizes the root causes and permanent fixes discovered during hard
 | **内建屏幕** | 14.0 英寸 2.8K 分辨率 (2880 × 1800), 16:10 比例, 120Hz 刷新率 | :white_check_mark: 原生 120Hz 高刷与 HiDPI 正常 |
 | **内存容量** | 16GB / 32GB 双通道 DDR5 5600MHz | :white_check_mark: 正常识别使用 |
 | **固态硬盘** | 双 M.2 PCIe 4.0 NVMe 插槽 | :white_check_mark: 原生 APFS 读写高速正常 |
-| **无线网卡** | Intel Wi-Fi 6 AX200 无线网卡 (802.11ax) | :white_check_mark: AirportItlwm 原生 Wi-Fi 选网 |
+| **无线网卡** | Intel Wi-Fi 6 AX200 无线网卡 (802.11ax) | :white_check_mark: ForbiddenItlwm 0.6.0-beta.2 + BTLEAdvFixup 0.9.3；26.7.3 隔空投送已实测可用 |
 | **蓝牙模块** | Intel AX200 蓝牙 5.2 (`8087:0029`) | :white_check_mark: 蓝牙耳机与键鼠稳定配对 |
 | **声卡芯片** | 新格 CX8070 声卡芯片 (`14F1:1F87`) | :white_check_mark: 扬声器外放与耳机输出正常 |
 | **内置麦克风** | [AMDMicrophone](https://github.com/qhuyduong/AMDMicrophone) | :white_check_mark: 进入系统后通过[部署脚本](scripts/一键部署麦克风.command)加载正常 |
-| **触控面板** | I2C HID 协议精密多点触控板 | :white_check_mark: VoodooI2C 原生多指手势丝滑跟手 |
+| **触控面板** | I2C HID 协议精密多点触控板 | :warning: 驱动已加载；输入报告和手势需在 26.7.3 上复测 |
 | **笔记本键盘** | PS/2 键盘，深度重映射多媒体功能键 | :white_check_mark: F8-F10 调音量、F11-F12 调亮度 |
 | **电池管理** | 原装锂聚合物电池 (`F166003A`) | :white_check_mark: SMCBatteryManager 准确显示百分比 |
 | **扩展接口** | 2x USB 3.2 Gen 1, 1x 全功能 Type-C, 1x USB4 Type-C, HDMI 2.1 | :white_check_mark: XhciNudge 彻底根治输入延迟 |
@@ -186,10 +241,10 @@ This table summarizes the root causes and permanent fixes discovered during hard
    - 访达窗口动画、程序坞磨砂、Launchpad 翻页及 120Hz 丝滑流畅。
 2. **彻底解决 Zen 4 架构 USB 输入中断延迟**：
    - 注入专为 AMD 现代平台编译的 `XhciNudge.kext` 并配合启动参数 `xhcinudge=1`，周期性唤醒状态寄存器，彻底消除“鼠标几秒动一下”的严重卡顿！
-3. **原生 Wi-Fi 图标与控制中心**：
-   - 注入针对 Darwin 24/25 内核编译的 `AirportItlwm.kext`，状态栏右上角直接显示原生 Wi-Fi 扇形图标，支持一键切换无线网络。
-4. **全套手势触控板体验**：
-   - 采用 `VoodooGPIO` -> `VoodooI2CServices` -> `VoodooInput` -> `VoodooI2C` -> `VoodooI2CHID` 链式注入，支持单指轻点、双指缩放及三指调度。
+3. **Intel AX200 无线网卡**：
+   - 当前 EFI 启用 `ForbiddenItlwm.kext` 0.5.4；Wi-Fi 驱动已部署，AirDrop 需在 macOS 26.7.3 上重新验证。
+4. **I2C 触控板驱动**：
+   - 已按 `VoodooGPIO` -> `VoodooI2CServices` -> `VoodooInput` -> `VoodooI2C` -> `VoodooI2CHID` 顺序加载；26.7.3 下输入报告和多指手势尚待实机复测。
 5. **定制键盘快捷键映射**：
    - F8 静音、F9 降音量、F10 增音量；F11 降亮度、F12 增亮度；自动互换 Win 与 Alt 键位（实现 Mac 标准 Cmd 与 Opt 布局）。
 
@@ -225,7 +280,7 @@ This table summarizes the root causes and permanent fixes discovered during hard
 ## 五、极速装机与部署指南
 
 ### 第一步：准备 U 盘并拷贝 EFI
-1. 制作 macOS Tahoe 26.6.2 安装 U 盘。
+1. 制作 macOS Tahoe 26.7.3 安装 U 盘。
 2. 挂载 U 盘的 EFI 分区（ESP）。
 3. 下载本项目 [`release/`](release/) 目录中的 `Mechrevo-Wujie14Pro-7840HS-780M-EFI.zip`。
 4. 将解压出来的 `BOOT` 与 `OC` 两个文件夹完整拷贝到 U 盘的 `EFI/` 目录下。
@@ -273,5 +328,16 @@ This table summarizes the root causes and permanent fixes discovered during hard
   - **[Acidanthera 团队](https://github.com/acidanthera)** (OpenCorePkg, Lilu, VirtualSMC, AppleALC, VoodooPS2)
   - **[NullArc / luuumi-dev](https://github.com/luuumi-dev/nullarc)**（AMD Radeon 780M Metal 显卡驱动体系）
   - **[VoodooI2C 团队](https://github.com/VoodooI2C/VoodooI2C)** (触控板多点触控支持)
-  - **[OpenIntelWireless 团队](https://github.com/OpenIntelWireless)** (AirportItlwm 与 IntelBluetoothFirmware)
+  - **[OpenIntelWireless 团队](https://github.com/OpenIntelWireless)** (IntelBluetoothFirmware)
+  - **[ForbiddenItlwm](https://github.com/retropineaple/ForbiddenItlwm)** (Intel AX200 Wi-Fi driver)
   - **AMD OS X 社区** (AMD Vanilla 内核补丁生态)
+
+<!-- HW-OUTPUT-BT-K580-20261119 -->
+## 2026-11-19 实机回归：USB-C 显示输出与 AX200 蓝牙
+
+- USB-C DP Alt Mode：本机两通道 HBR2 已实测输出 2560×1440 @ 60Hz，内屏保持 2880×1800 @ 120Hz。
+- USB-C 转 HDMI：QGeeM USB-C 多功能扩展坞在本轮更新后重启，用户确认 HDMI 输出恢复正常；本次未记录 HDMI 的具体分辨率/刷新率。
+- AX200 / K580 蓝牙：蓝牙服务反复退出的问题经驱动组合更新与重启后恢复正常。当前组件为 IntelBluetoothFirmware 2.5.2、BTLEAdvFixup 0.9.3、ForbiddenItlwm 0.6.0-beta.2、BlueToolFixup 2.7.2。
+- 配置要点：AirportItlwm 禁用，ForbiddenItlwm 与 BTLEAdvFixup 启用；IntelBTPatcher 保持禁用。
+
+实测记录：[USB-C DP / HDMI](docs/USB-C-DP-BRINGUP.md) · [AX200 / K580 蓝牙修复](docs/BLUETOOTH-K580-FIX.md)

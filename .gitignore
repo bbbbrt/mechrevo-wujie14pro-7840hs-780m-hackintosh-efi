@@ -23,3 +23,20 @@ opencore.txt
 .contentFlavour
 
 .contentVisibility
+
+
+# EFI 本机历史备份与调试文件
+EFI/OC/Backup_*/
+EFI/OC/config.plist.*
+EFI/OC/*.bak*
+EFI/OC/*.old
+EFI/OC/*.log
+.contentVisibility
+
+# NullArc 本机运行日志、固件与构建产物
+*.log
+scripts/nullarc-runtime/fw/
+scripts/nullarc-runtime/build/
+
+# Local-only backups; never publish
+_backups/

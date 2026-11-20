@@ -71,3 +71,43 @@ bash -c "$(curl -fsSL https://gitee.com/xzhih/one-key-hidpi/raw/master/hidpi.sh)
 如果 macOS 发生任何异常，随时返回 Windows：
 1. 随时在桌面上运行 **`SYNC_EFI_TO_SSD.bat`**。
 2. 历史版本完整存档在 `D:\EFI_Versions\`，可随时一秒刷回任何基线。
+
+
+## USB-C 一线连外接显示器（本机已实机成功）
+
+2026-11-20 回归确认：USB-C 一线连显示器（DP Alt Mode）可正常输出；Type-C 转 HDMI（QGeeM 扩展坞）也已由用户实机确认可用。DP 直连曾记录外屏 2560×1440@60Hz、内屏 2880×1800@120Hz 同时在线；HDMI 的精确分辨率/刷新率尚未记录。
+
+- DP Alt Mode 两通道 HBR2，链路训练成功。
+- 需要 NullArc PhxAccel 提供第二显示头 framebuffer；仅训练 DP 物理链路不够。
+- 本机使用 `phxfb2=1` 启用第二 framebuffer，并由 `local.usbc-dp` LaunchDaemon 自动处理热插拔。
+- 详细原理、实测寄存器、部署位置与限制见 [USB-C 一线连技术记录](USB-C-DP-BRINGUP.md)。
+
+注意：当前只验证 2-lane HBR2 / 2560×1440@60Hz；尚未验证 4-lane DP、USB 3.x 并发、睡眠唤醒和其他扩展坞组合。
+
+<!-- HW-OUTPUT-BT-K580-20261119 -->
+## 五、AX200 蓝牙与 Logitech K580 回归（2026-11-19）
+
+本机 Intel AX200 蓝牙 USB ID 为 8087:0029，系统 Tahoe 26.7.3（25G342）。本轮更新后实际加载版本：
+- IntelBluetoothFirmware 2.5.2
+- BTLEAdvFixup 0.9.3
+- ForbiddenItlwm 0.6.0-beta.2
+- BlueToolFixup 2.7.2
+
+IntelBTPatcher 必须保持禁用；AirportItlwm 必须禁用，避免与 ForbiddenItlwm 同时工作。
+
+检查命令：
+
+    system_profiler SPBluetoothDataType
+    kmutil showloaded | grep -E 'IntelBluetoothFirmware|BlueToolFixup|BTLEAdvFixup|ForbiddenItlwm|IntelBTPatcher'
+    ioreg -l -w0 -d1 | grep 'BTLEAdv'
+
+连接 BLE 键盘时，可观察 BTLEAdvEventPipes 与 BTLEAdvLengthRewrites 计数是否出现并变化。不要只凭蓝牙菜单可见就判定配对成功。
+
+## 六、USB-C DP / HDMI 外接显示回归（2026-11-19）
+
+- DP 直连基准：两通道 HBR2、外接 2560×1440 @ 60Hz、内屏 2880×1800 @ 120Hz。
+- QGeeM Type-C 转 HDMI：已由用户确认实机输出正常；精确分辨率/刷新率、热插拔和睡眠唤醒仍待补测。
+- 不把 DP 直连的分辨率数据直接套用到 HDMI 转接器。
+- 不刷写或替换本机导出的 VBIOS。
+
+完整记录见 USB-C-DP-BRINGUP.md 与 BLUETOOTH-K580-FIX.md。

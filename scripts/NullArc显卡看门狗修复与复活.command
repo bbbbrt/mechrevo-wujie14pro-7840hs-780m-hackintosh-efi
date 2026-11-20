@@ -1,42 +1,27 @@
 #!/bin/bash
-# ========================================================
-# 机械革命无界 14 Pro - NullArc 780M 看门狗复活与清理工具
-# NullArc GPU Watchdog Reset & Recovery Tool
-# ========================================================
-
-clear
-echo "=========================================================="
-echo "    NullArc 780M 显卡加速死锁排查与一键复活工具"
-echo "=========================================================="
-echo "适用场景: 开启显卡后死机/黑屏/连环重启，或被看门狗安全回退"
-echo "=========================================================="
-echo ""
-
-echo "[1/4] 清理 WindowServer 遗留的显示器与分辨率脏配置..."
-sudo rm -f /Library/Preferences/com.apple.windowserver.displays.plist
-rm -f ~/Library/Preferences/ByHost/com.apple.windowserver.displays.*.plist
-
-echo "[2/4] 清空旧崩溃日志与看门狗计数器..."
-sudo rm -f /Library/Logs/DiagnosticReports/WindowServer*
-sudo rm -f /var/db/phxboot.pending
-sudo rm -f /Users/Shared/gpu/hang-reboots
-
-echo "[3/4] 清除 BetterDisplay 潜在冲突配置文件..."
-rm -rf ~/Library/Application\ Support/BetterDisplay* 2>/dev/null
-rm -rf ~/Library/Preferences/pro.betterdisplay* 2>/dev/null
-
-echo "[4/4] 解除 NullArc 禁用锁 (激活 780M 硬件加速)..."
-sudo rm -f /Users/Shared/gpu/phxboot-off
-
-echo ""
-echo "=========================================================="
-echo " [完成] 复活环境清理完毕！"
-echo " 提示: 请务必确保【自动登录】处于开启状态！"
-echo "=========================================================="
-echo ""
-read -p "是否立即重启电脑生效？(y/n): " confirm
-if [ "$confirm" = "y" ] || [ "$confirm" = "Y" ]; then
-    sudo reboot
-else
-    echo "请稍后手动重启。"
+# NullArc 状态检查工具：只读取当前状态，不清日志、不删标记、不重启。
+set -euo pipefail
+GPU_ROOT=/Users/Shared/gpu
+if [[ ! -x "$GPU_ROOT/recover.sh" ]]; then
+    echo "没有找到当前 NullArc recover.sh：$GPU_ROOT/recover.sh"
+    echo "请先按仓库 docs/NullArc显卡加速恢复指南.md 检查部署状态。"
+    read -r -p "按回车退出。"
+    exit 1
 fi
+echo "=== NullArc 只读状态检查 ==="
+"$GPU_ROOT/recover.sh" --status
+echo
+if command -v xcodebuild >/dev/null 2>&1; then
+    if xcodebuild -checkFirstLaunchStatus >/dev/null 2>&1; then
+        echo "Xcode 首次启动状态：通过"
+    else
+        echo "Xcode 首次启动状态：未完成"
+        echo "请在终端执行：sudo xcodebuild -license accept"
+        echo "然后执行：sudo xcodebuild -runFirstLaunch"
+    fi
+else
+    echo "未找到 xcodebuild；NullArc 启动脚本将跳过 GPU 初始化。"
+fi
+echo
+echo "本工具只读，不会删除诊断日志、修改 NVRAM、重启 WindowServer 或重启整机。"
+read -r -p "按回车退出。"
