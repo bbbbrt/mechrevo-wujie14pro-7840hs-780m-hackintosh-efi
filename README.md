@@ -186,7 +186,7 @@ This table summarizes the root causes and permanent fixes discovered during hard
 | **#4** | **`SecureBootModel=Default`** | **Prohibit Sign 🚫 in APFS Update**: `OPEN! Err(0xE) root_hash`. | Patched AMD kernel fails Apple Secure Boot T2 manifest root hash verification. | **Set `Misc -> Security -> SecureBootModel = Disabled`.** |
 | **#5** | **[NullArc](https://github.com/luuumi-dev/nullarc) Blank Login Window** | **Black screen with working cursor** on boot. | [NullArc](https://github.com/luuumi-dev/nullarc) GPU rendering path cannot composite the native `loginwindow` UI. | **Type user password blindly and press Enter, or enable macOS Auto-Login.** |
 | **#6** | **`Display-Override.kext`** | **System freeze halfway through Apple logo progress bar.** | Attaching `AppleBacklightDisplay` to AMD 780M Framebuffer dereferences null registers. | **Delete this kext completely!** Use BetterDisplay for HiDPI and scaling. |
-| **#7** | **`MechrevoFan.kext`** | **Instant hardware power-off / reboot** upon kext injection. | Raw I/O port `0x66/0x68` concurrency conflicts with ACPI EC controller on Zen 4. | **Keep `MechrevoFan.kext` disabled** unless dedicated ACPI mutex patches are applied. |
+| **MechrevoFan.kext** | Enabled in this release because it is enabled in the currently running, physically tested EFI. | Fan control interacts with the embedded controller (EC); behavior may vary by hardware and firmware. | **Verified only on this machine. Monitor fan speed and temperature; disable immediately if fan control, thermals, or system stability behave abnormally.** |
 | **#8** | **`phxboot.pending` NVRAM Lock** | **Endless reboot loop**: Rebooting every 90 seconds after `mesboot`. | Watchdog script writes state to NVRAM. Booting again without cleaning repeats watchdog. | **Press Spacebar in OpenCore and execute `Reset NVRAM`!** |
 
 ---
@@ -316,7 +316,7 @@ This table summarizes the root causes and permanent fixes discovered during hard
 | **💀 死亡案例 4** | **`SecureBootModel=Default`**<br>(Apple 安全引导) | **第二阶段更新报禁止标志 🚫**：报 `Err(0xE) usr\standalone\OS.dmg.root_hash`。 | AMD Vanilla 补丁修补了内核，触发 T2 芯片根哈希校验拦截。 | **必须将 `SecureBootModel` 改为 `Disabled`！** 彻底绕过原厂根哈希拦截。 |
 | **💀 死亡案例 5** | **[NullArc](https://github.com/luuumi-dev/nullarc) 显卡盲打登录机理**<br>(登录界面全黑) | **开机进入登录界面全黑，仅有鼠标光标能活动**。 | [NullArc](https://github.com/luuumi-dev/nullarc) 官方明确说明，GPU 渲染管道无法合成渲染 macOS 原生的 `loginwindow` 窗口服务。 | **此时键盘盲打登录密码并按回车即可进入桌面，或在系统中开启“自动登录”！** |
 | **💀 死亡案例 6** | **`Display-Override.kext`**<br>(屏幕伪装驱动) | **白苹果进度条过半死锁**：苹果进度条走到 1/3~1/2（显卡切换瞬间）画面永久冻结。 | 驱动强行挂载 `AppleBacklightDisplay` 到 AMD 780M Framebuffer，由于缺少硬件原生背光寄存器触发空指针崩溃。 | **【铁律】彻底移除该 kext！** 分辨率与缩放交由 BetterDisplay 管理。 |
-| **💀 死亡案例 7** | **`MechrevoFan.kext`**<br>(机械革命风扇驱动) | **硬件看门狗瞬间重启**：驱动注入瞬间主板硬件级强行掉电重启。 | 驱动直接通过 I/O 端口 `0x66/0x68` 并发无锁读写嵌入式控制器（EC），在 Zen 4 下与 ACPI 产生严重硬件资源争用导致 EC 挂起。 | **禁止盲目开启！** 保持该条目为 `False`。 |
+| **MechrevoFan.kext** | Enabled in this release because it is enabled in the currently running, physically tested EFI. | Fan control interacts with the embedded controller (EC); behavior may vary by hardware and firmware. | **Verified only on this machine. Monitor fan speed and temperature; disable immediately if fan control, thermals, or system stability behave abnormally.** |
 | **💀 死亡案例 8** | **NVRAM 遗留状态**<br>(`phxboot.pending` 挂起锁) | **连环重启“躺枪”**：明明改回了正确 EFI，开机依然自动重启。 | macOS 显卡守护进程异常退出时向主板 NVRAM 写入未完成标志，下次开机重复触发看门狗重启。 | **修改排错后必须按空格执行一次 `Reset NVRAM`！** 彻底清空主板异常状态位。 |
 
 ---

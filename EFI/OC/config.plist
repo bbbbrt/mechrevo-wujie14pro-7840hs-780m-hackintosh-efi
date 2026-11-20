@@ -932,7 +932,7 @@
 				<key>Comment</key>
 				<string>Mechrevo Wujie 14 Pro Fan and Thermal Control</string>
 				<key>Enabled</key>
-				<false/>
+				<true/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/MechrevoFan</string>
 				<key>MaxKernel</key>
@@ -2235,6 +2235,8 @@
 		<key>WriteFlash</key>
 		<true/>
 	</dict>
+	<key>NVRAM:Add:7C436110-AB2A-4BBB-A880-FE41995C9F82:boot-args</key>
+	<string>keepsyms=1 debug=0x100 revpatch=cpuname,sbvmm alcid=15 -vi2c-force-polling xhcinudge=1 -no_compat_check amfi=0x80 amfi_get_out_of_my_way=0x1 -amfipassbeta phxdebug=1 ipc_control_port_options=0 agdpmod=vit9696 -btleadv -itlawdlcoexprobe -itlawdliface -itlawdlnativeup -itlawdlcoexrx -itlawdlcoextx -itlawdlcoexmulti -itlawdlcoexdata -itlawdlmitx -itlawdlelicit -itlawdlcaps -itlawdlsvcmerge -itlawdlawsync itlawdlintcoal=4 -itlawdlcoexbatx -itlawdlcoexpeerpause -itlawdlcoexbatrace itlawdltxqueue=4096 -itlawdlanybuild phxfb2=1</string>
 	<key>PlatformInfo</key>
 	<dict>
 		<key>Automatic</key>

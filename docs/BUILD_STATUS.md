@@ -9,6 +9,7 @@
 - 触控板输入、点击及多指手势已在当前实机环境测试通过；早期诊断记录仅代表当时状态。
 - USB-C 一线连与 Type-C 转 HDMI 均已确认可用；睡眠、唤醒及合盖恢复已在当前实机环境测试通过。HDMI 精确分辨率/刷新率未记录。
 - 历史记录中的个别故障归因属于当时观察，不代表所有设备均适用。
+- MechrevoFan.kext is enabled in the currently running physical EFI and remains enabled in this release. This is verified only on the current machine; monitor fan speed and temperature, and disable it immediately if abnormal behavior occurs.
 
 > 公开说明：本文是开发过程的历史排错日志，不代表当前所有功能都已在所有系统版本完整验证。部分早期根因分析属于当时的诊断假设，应以实机日志和上游文档重新确认。个人密码及本机目录路径已清理。
 
